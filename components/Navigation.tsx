@@ -19,14 +19,14 @@ const Navigation: React.FC<NavigationProps> = ({ className }) => {
       icon: '🏠',
     },
     {
-      href: '/dashboard',
+      href: '/simple-dashboard',
       label: 'Dashboard',
       icon: '📊',
     },
     {
       href: '/tweet',
-      label: 'Quick Post',
-      icon: '🚀',
+      label: 'Tweet',
+      icon: '✍️',
     },
   ];
 
@@ -48,7 +48,7 @@ const Navigation: React.FC<NavigationProps> = ({ className }) => {
           <div className="flex items-center space-x-8">
             {navItems.map((item) => {
               const isActive = pathname === item.href;
-              
+
               return (
                 <Link
                   key={item.href}

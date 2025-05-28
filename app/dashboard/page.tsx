@@ -22,9 +22,10 @@ const DashboardPage: React.FC = () => {
   const [tweets, setTweets] = useState<Tweet[]>([]);
   const [session, setSession] = useState<UserSession | null>(null);
   const [config, setConfig] = useState<PostingConfig | null>(null);
-  const [activeTab, setActiveTab] = useState<'queue' | 'scheduler' | 'monitor' | 'errors' | 'settings'>('queue');
+  const [activeTab, setActiveTab] = useState<'queue' | 'scheduler' | 'settings'>('queue');
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [showAdvanced, setShowAdvanced] = useState(false);
 
   // Load initial data
   useEffect(() => {
@@ -90,9 +91,7 @@ const DashboardPage: React.FC = () => {
 
   const tabs = [
     { id: 'queue' as const, label: 'Tweet Queue', icon: '📝' },
-    { id: 'scheduler' as const, label: 'Scheduler', icon: '🤖' },
-    { id: 'monitor' as const, label: 'Monitor', icon: '📊' },
-    { id: 'errors' as const, label: 'Errors', icon: '🚨' },
+    { id: 'scheduler' as const, label: 'Automation', icon: '🤖' },
     { id: 'settings' as const, label: 'Settings', icon: '⚙️' },
   ];
 
@@ -110,191 +109,201 @@ const DashboardPage: React.FC = () => {
   }
 
   return (
-    <Layout>
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-            <p className="text-gray-600 mt-1">
-              Manage your tweet queue and posting settings
-            </p>
-          </div>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+      {/* Header */}
+      <div className="bg-white shadow-sm border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mr-4">
+                <span className="text-2xl">🚀</span>
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">Tweet Cannon Dashboard</h1>
+                <p className="text-gray-600">
+                  Manage your tweets and automation
+                </p>
+              </div>
+            </div>
 
-          <div className="flex items-center space-x-2">
-            <StatusMonitor compact />
+            <div className="flex items-center space-x-4">
+              <StatusMonitor compact />
+              <button
+                onClick={() => setShowAdvanced(!showAdvanced)}
+                className="text-sm text-gray-600 hover:text-gray-900 underline"
+              >
+                {showAdvanced ? 'Hide' : 'Show'} Advanced
+              </button>
+            </div>
           </div>
         </div>
+      </div>
 
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Quick Stats */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2">
-            <QueueStats refreshTrigger={refreshTrigger} />
-          </div>
-          <div>
-            <Card>
-              <CardHeader>
-                <CardTitle>Quick Actions</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                <Button
-                  className="w-full"
-                  onClick={() => setActiveTab('queue')}
-                  variant={activeTab === 'queue' ? 'primary' : 'secondary'}
-                >
-                  📝 Manage Queue
-                </Button>
-                <Button
-                  className="w-full"
-                  onClick={() => setActiveTab('scheduler')}
-                  variant={activeTab === 'scheduler' ? 'primary' : 'secondary'}
-                >
-                  🤖 Scheduler
-                </Button>
-                <Button
-                  className="w-full"
-                  onClick={() => setActiveTab('monitor')}
-                  variant={activeTab === 'monitor' ? 'primary' : 'secondary'}
-                >
-                  📊 Monitor
-                </Button>
-                <Button
-                  className="w-full"
-                  onClick={() => setActiveTab('errors')}
-                  variant={activeTab === 'errors' ? 'primary' : 'secondary'}
-                >
-                  🚨 Errors
-                </Button>
-                <Button
-                  className="w-full"
-                  onClick={() => setActiveTab('settings')}
-                  variant={activeTab === 'settings' ? 'primary' : 'secondary'}
-                >
-                  ⚙️ Settings
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
+        <div className="mb-8">
+          <QueueStats refreshTrigger={refreshTrigger} />
         </div>
 
         {/* Tab Navigation */}
-        <div className="border-b border-gray-200">
-          <nav className="-mb-px flex space-x-8">
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`py-2 px-1 border-b-2 font-medium text-sm flex items-center space-x-1 ${
-                  activeTab === tab.id
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                }`}
-              >
-                <span>{tab.icon}</span>
-                <span>{tab.label}</span>
-              </button>
-            ))}
-          </nav>
+        <div className="mb-8">
+          <div className="bg-white rounded-2xl shadow-lg p-2">
+            <nav className="flex space-x-2">
+              {tabs.map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`flex-1 py-3 px-4 rounded-xl font-medium text-sm flex items-center justify-center space-x-2 transition-colors ${
+                    activeTab === tab.id
+                      ? 'bg-blue-600 text-white shadow-md'
+                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                  }`}
+                >
+                  <span>{tab.icon}</span>
+                  <span>{tab.label}</span>
+                </button>
+              ))}
+            </nav>
+          </div>
         </div>
 
         {/* Tab Content */}
         {activeTab === 'queue' && (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Tweet Input */}
             <div className="lg:col-span-1">
-              <TweetInput onTweetAdded={handleTweetAdded} />
+              <div className="bg-white rounded-2xl shadow-lg p-6">
+                <TweetInput onTweetAdded={handleTweetAdded} />
+              </div>
             </div>
 
             {/* Tweet Queue */}
             <div className="lg:col-span-2">
-              <TweetQueue
-                tweets={tweets}
-                onTweetUpdated={handleTweetUpdated}
-                onTweetDeleted={handleTweetDeleted}
-              />
+              <div className="bg-white rounded-2xl shadow-lg p-6">
+                <TweetQueue
+                  tweets={tweets}
+                  onTweetUpdated={handleTweetUpdated}
+                  onTweetDeleted={handleTweetDeleted}
+                />
+              </div>
             </div>
           </div>
         )}
 
         {activeTab === 'scheduler' && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="space-y-8">
             {/* Scheduler Controls */}
-            <SchedulerControls
-              config={config || { enabled: false, cadence: 'daily', interval: 24, randomWindow: 30 }}
-              session={session}
-              onConfigChange={handleConfigUpdated}
-              onTweetPosted={handleSchedulerTweetPosted}
-            />
+            <div className="bg-white rounded-2xl shadow-lg p-6">
+              <SchedulerControls
+                config={config || { enabled: false, cadence: 'daily', interval: 24, randomWindow: 30 }}
+                session={session}
+                onConfigChange={handleConfigUpdated}
+                onTweetPosted={handleSchedulerTweetPosted}
+              />
+            </div>
 
-            {/* Scheduler Info */}
-            <Card>
-              <CardHeader>
-                <CardTitle>How It Works</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="text-sm text-gray-600 space-y-2">
-                  <p>
-                    🤖 The automated scheduler runs in the background using Web Workers
-                  </p>
-                  <p>
-                    ⏰ Posts tweets from your queue at the configured intervals
-                  </p>
-                  <p>
-                    🎲 Adds randomization to posting times to appear more natural
-                  </p>
-                  <p>
-                    📊 Automatically updates tweet statuses and provides real-time feedback
-                  </p>
-                  <p>
-                    ⚡ Continues running even when you close the browser tab
-                  </p>
+            {/* How It Works */}
+            <div className="bg-white rounded-2xl shadow-lg p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                <span className="mr-2">💡</span>
+                How Automation Works
+              </h3>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <div className="flex items-start">
+                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3 mt-0.5">
+                      <span className="text-sm">🤖</span>
+                    </div>
+                    <div>
+                      <h4 className="font-medium text-gray-900">Smart Scheduling</h4>
+                      <p className="text-sm text-gray-600">Automatically posts tweets from your queue at optimal times</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start">
+                    <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5">
+                      <span className="text-sm">🎲</span>
+                    </div>
+                    <div>
+                      <h4 className="font-medium text-gray-900">Natural Timing</h4>
+                      <p className="text-sm text-gray-600">Adds randomization to appear more human-like</p>
+                    </div>
+                  </div>
                 </div>
 
-                <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
-                  <p className="text-sm font-medium text-blue-800 mb-1">
-                    💡 Pro Tip
-                  </p>
-                  <p className="text-xs text-blue-600">
-                    Keep this tab open for the best experience. The scheduler will continue
-                    running in the background, but you'll get real-time updates here.
-                  </p>
+                <div className="space-y-4">
+                  <div className="flex items-start">
+                    <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center mr-3 mt-0.5">
+                      <span className="text-sm">⚡</span>
+                    </div>
+                    <div>
+                      <h4 className="font-medium text-gray-900">Background Operation</h4>
+                      <p className="text-sm text-gray-600">Continues working even when you close the browser</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start">
+                    <div className="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center mr-3 mt-0.5">
+                      <span className="text-sm">📊</span>
+                    </div>
+                    <div>
+                      <h4 className="font-medium text-gray-900">Real-time Updates</h4>
+                      <p className="text-sm text-gray-600">Get instant feedback on posting status</p>
+                    </div>
+                  </div>
                 </div>
-              </CardContent>
-            </Card>
-          </div>
-        )}
-
-        {activeTab === 'monitor' && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Status Monitor */}
-            <StatusMonitor />
-
-            {/* Activity Feed */}
-            <ActivityFeed />
-          </div>
-        )}
-
-        {activeTab === 'errors' && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Error Dashboard */}
-            <ErrorDashboard />
-
-            {/* Retry Settings */}
-            <RetrySettings />
+              </div>
+            </div>
           </div>
         )}
 
         {activeTab === 'settings' && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Authentication Settings */}
-            <AuthSettings onAuthUpdated={handleAuthUpdated} />
+          <div className="space-y-8">
+            {/* Main Settings */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <div className="bg-white rounded-2xl shadow-lg p-6">
+                <AuthSettings onAuthUpdated={handleAuthUpdated} />
+              </div>
 
-            {/* Posting Settings */}
-            <PostingSettings onConfigUpdated={handleConfigUpdated} />
+              <div className="bg-white rounded-2xl shadow-lg p-6">
+                <PostingSettings onConfigUpdated={handleConfigUpdated} />
+              </div>
+            </div>
+
+            {/* Advanced Settings */}
+            {showAdvanced && (
+              <div className="space-y-8">
+                <div className="bg-white rounded-2xl shadow-lg p-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                    <span className="mr-2">🔧</span>
+                    Advanced Features
+                  </h3>
+
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div>
+                      <StatusMonitor />
+                    </div>
+                    <div>
+                      <ActivityFeed />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                  <div className="bg-white rounded-2xl shadow-lg p-6">
+                    <ErrorDashboard />
+                  </div>
+                  <div className="bg-white rounded-2xl shadow-lg p-6">
+                    <RetrySettings />
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>
-    </Layout>
+    </div>
   );
 };
 

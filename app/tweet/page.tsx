@@ -9,6 +9,7 @@ export default function TweetPage() {
   const [authToken, setAuthToken] = useState('');
   const [isSetupMode, setIsSetupMode] = useState(true);
   const [validationStatus, setValidationStatus] = useState<'idle' | 'validating' | 'valid' | 'invalid'>('idle');
+  const [showSuccess, setShowSuccess] = useState(false);
 
   // Check if we have saved session on load
   useEffect(() => {
@@ -105,8 +106,9 @@ export default function TweetPage() {
       const data = await response.json();
 
       if (response.ok) {
-        alert('🚀 Tweet posted successfully!');
         setMessage('');
+        setShowSuccess(true);
+        setTimeout(() => setShowSuccess(false), 5000);
       } else {
         alert(`❌ Error: ${data.error}`);
       }
@@ -132,89 +134,143 @@ export default function TweetPage() {
 
   if (isSetupMode) {
     return (
-      <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-6">
-          <h1 className="text-3xl font-bold text-center mb-6">Tweet Cannon Setup 🚀</h1>
-
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
-            <h3 className="font-semibold text-yellow-800 mb-2">⚠️ One-time Setup Required</h3>
-            <p className="text-yellow-700 text-sm">
-              We need your Twitter cookies to post tweets. This is stored locally and never sent to our servers.
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-2xl mx-auto">
+          {/* Header */}
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded-full mb-4">
+              <span className="text-2xl">🚀</span>
+            </div>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">Connect to Twitter</h1>
+            <p className="text-gray-600">
+              Let's connect your Twitter account so you can start posting
             </p>
           </div>
 
-          <div className="space-y-4">
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <h3 className="font-semibold text-blue-800 mb-3">📋 How to get your cookies:</h3>
-              <p className="text-blue-700 text-sm mb-3">
-                You need to collect <strong>two things</strong> from Twitter:
+          {/* Setup Card */}
+          <div className="bg-white rounded-2xl shadow-lg p-8">
+            <div className="mb-6">
+              <div className="flex items-center justify-center w-12 h-12 bg-blue-100 rounded-xl mx-auto mb-4">
+                <span className="text-xl">🔐</span>
+              </div>
+              <h2 className="text-xl font-semibold text-center text-gray-900 mb-2">
+                Quick Setup
+              </h2>
+              <p className="text-center text-gray-600 text-sm">
+                We need to connect to your Twitter account. Don't worry - everything stays on your device.
               </p>
+            </div>
 
-              <div className="mb-4">
-                <h4 className="font-semibold text-blue-800 mb-2">Step 1: Get auth_token (HttpOnly cookie)</h4>
-                <ol className="list-decimal list-inside space-y-1 text-blue-700 text-sm ml-4">
-                  <li>Open Twitter/X in a new tab and make sure you're logged in</li>
-                  <li>Press F12 to open Developer Tools</li>
-                  <li>Go to <strong>Application tab → Storage → Cookies → https://x.com</strong></li>
-                  <li>Find the <code className="bg-blue-100 px-1 rounded">auth_token</code> cookie and copy its value</li>
-                </ol>
+            {/* Simplified Instructions */}
+            <div className="bg-blue-50 border border-blue-200 rounded-xl p-6 mb-6">
+              <h3 className="font-semibold text-blue-900 mb-4 flex items-center">
+                <span className="mr-2">📋</span>
+                Follow these simple steps:
+              </h3>
+
+              <div className="space-y-4">
+                <div className="flex items-start">
+                  <div className="flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold mr-3 mt-0.5">
+                    1
+                  </div>
+                  <div>
+                    <p className="text-blue-900 font-medium">Open Twitter in a new tab</p>
+                    <p className="text-blue-700 text-sm">Make sure you're logged in to your account</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start">
+                  <div className="flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold mr-3 mt-0.5">
+                    2
+                  </div>
+                  <div>
+                    <p className="text-blue-900 font-medium">Press F12 to open Developer Tools</p>
+                    <p className="text-blue-700 text-sm">Go to Application → Cookies → x.com</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start">
+                  <div className="flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold mr-3 mt-0.5">
+                    3
+                  </div>
+                  <div>
+                    <p className="text-blue-900 font-medium">Find and copy the "auth_token" value</p>
+                    <p className="text-blue-700 text-sm">Paste it in the first field below</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start">
+                  <div className="flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold mr-3 mt-0.5">
+                    4
+                  </div>
+                  <div>
+                    <p className="text-blue-900 font-medium">Go to Console tab and run: <code className="bg-blue-100 px-1 rounded text-xs">document.cookie</code></p>
+                    <p className="text-blue-700 text-sm">Copy the output and paste it in the second field</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Input Fields */}
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  🔑 Auth Token
+                </label>
+                <textarea
+                  value={authToken}
+                  onChange={(e) => setAuthToken(e.target.value)}
+                  placeholder="Paste your auth_token value here..."
+                  className="w-full h-20 px-4 py-3 border border-gray-300 rounded-xl text-sm font-mono focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
               </div>
 
               <div>
-                <h4 className="font-semibold text-blue-800 mb-2">Step 2: Get other cookies</h4>
-                <ol className="list-decimal list-inside space-y-1 text-blue-700 text-sm ml-4">
-                  <li>Go to <strong>Console tab</strong> in DevTools</li>
-                  <li>Copy and paste this script:</li>
-                </ol>
-                <div className="bg-gray-800 text-green-400 p-3 rounded mt-2 text-sm font-mono">
-                  <div className="text-gray-300 mb-1">// Copy this script:</div>
-                  <div>document.cookie</div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  🍪 Cookie String
+                </label>
+                <textarea
+                  value={cookieString}
+                  onChange={(e) => setCookieString(e.target.value)}
+                  placeholder="Paste the output of document.cookie here..."
+                  className="w-full h-24 px-4 py-3 border border-gray-300 rounded-xl text-sm font-mono focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+
+              <button
+                onClick={extractAndValidateCookies}
+                disabled={validationStatus === 'validating' || !cookieString.trim() || !authToken.trim()}
+                className="w-full bg-blue-600 text-white py-4 px-6 rounded-xl hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed font-semibold text-lg transition-colors"
+              >
+                {validationStatus === 'validating' ? (
+                  <span className="flex items-center justify-center">
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                    Connecting to Twitter...
+                  </span>
+                ) : (
+                  '🚀 Connect Twitter Account'
+                )}
+              </button>
+
+              {validationStatus === 'invalid' && (
+                <div className="bg-red-50 border border-red-200 rounded-xl p-4">
+                  <div className="flex items-center">
+                    <span className="text-red-500 mr-2">❌</span>
+                    <p className="text-red-700 text-sm font-medium">
+                      Connection failed. Please check your auth_token and try again.
+                    </p>
+                  </div>
                 </div>
-                <p className="text-blue-700 text-sm mt-2">
-                  Copy the output and paste it in the second field below.
-                </p>
+              )}
+            </div>
+
+            {/* Security Note */}
+            <div className="mt-6 p-4 bg-gray-50 rounded-xl">
+              <div className="flex items-center text-gray-600 text-sm">
+                <span className="mr-2">🔒</span>
+                <span>Your credentials are stored securely on your device and never sent to our servers.</span>
               </div>
             </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Auth Token (from DevTools Application tab)
-              </label>
-              <textarea
-                value={authToken}
-                onChange={(e) => setAuthToken(e.target.value)}
-                placeholder="Paste your auth_token value here..."
-                className="w-full h-20 px-3 py-2 border border-gray-300 rounded-md text-sm font-mono"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Cookie String (from Console document.cookie)
-              </label>
-              <textarea
-                value={cookieString}
-                onChange={(e) => setCookieString(e.target.value)}
-                placeholder="Paste the output of document.cookie here..."
-                className="w-full h-24 px-3 py-2 border border-gray-300 rounded-md text-sm font-mono"
-              />
-            </div>
-
-            <button
-              onClick={extractAndValidateCookies}
-              disabled={validationStatus === 'validating' || !cookieString.trim() || !authToken.trim()}
-              className="w-full bg-blue-500 text-white py-3 px-4 rounded-md hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {validationStatus === 'validating' ? 'Validating with Twitter...' : 'Validate & Save Cookies'}
-            </button>
-
-            {validationStatus === 'invalid' && (
-              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                <p className="text-red-700 text-sm">
-                  ❌ Validation failed. Make sure you're logged into Twitter and copied the correct auth_token.
-                </p>
-              </div>
-            )}
           </div>
         </div>
       </div>
@@ -222,46 +278,142 @@ export default function TweetPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md mx-auto bg-white rounded-lg shadow-md p-6">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold">Tweet Cannon 🚀</h1>
-          <button
-            onClick={resetSetup}
-            className="text-sm text-gray-500 hover:text-gray-700"
-          >
-            Reset Setup
-          </button>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-2xl mx-auto">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded-full mb-4">
+            <span className="text-2xl">🚀</span>
+          </div>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Tweet Cannon</h1>
+          <p className="text-gray-600">
+            What's on your mind today?
+          </p>
         </div>
 
-        <form onSubmit={handleTweetSubmit} className="space-y-4">
-          <div>
-            <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-2">
-              What's happening?
-            </label>
-            <textarea
-              id="message"
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              placeholder="Enter your tweet..."
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              rows={4}
-              maxLength={280}
-              required
-            />
-            <div className="text-right text-sm text-gray-500 mt-1">
-              {message.length}/280
+        {/* Success Message */}
+        {showSuccess && (
+          <div className="bg-green-50 border border-green-200 rounded-2xl p-6 mb-8">
+            <div className="flex items-center">
+              <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mr-4">
+                <span className="text-xl">🚀</span>
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-green-900">Tweet Posted Successfully!</h3>
+                <p className="text-green-700">Your tweet has been posted to Twitter.</p>
+              </div>
             </div>
           </div>
+        )}
 
-          <button
-            type="submit"
-            disabled={isLoading || !message.trim()}
-            className="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {isLoading ? 'Posting...' : 'Post Tweet'}
-          </button>
-        </form>
+        {/* Tweet Composer */}
+        <div className="bg-white rounded-2xl shadow-lg p-8">
+          <form onSubmit={handleTweetSubmit} className="space-y-6">
+            <div>
+              <label htmlFor="message" className="block text-lg font-semibold text-gray-900 mb-4">
+                ✍️ Compose your tweet
+              </label>
+              <div className="relative">
+                <textarea
+                  id="message"
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  placeholder="What's happening?"
+                  className="w-full px-6 py-4 border-2 border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-lg resize-none"
+                  rows={6}
+                  maxLength={280}
+                  required
+                />
+                <div className="absolute bottom-4 right-4 flex items-center space-x-2">
+                  <div className={`text-sm font-medium ${
+                    message.length > 260 ? 'text-red-500' :
+                    message.length > 240 ? 'text-yellow-500' :
+                    'text-gray-500'
+                  }`}>
+                    {message.length}/280
+                  </div>
+                  {message.length > 260 && (
+                    <span className="text-red-500">⚠️</span>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex flex-col sm:flex-row gap-4">
+              <button
+                type="submit"
+                disabled={isLoading || !message.trim()}
+                className="flex-1 bg-blue-600 text-white py-4 px-6 rounded-xl hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed font-semibold text-lg transition-colors"
+              >
+                {isLoading ? (
+                  <span className="flex items-center justify-center">
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                    Posting...
+                  </span>
+                ) : (
+                  <span className="flex items-center justify-center">
+                    <span className="mr-2">🚀</span>
+                    Post Now
+                  </span>
+                )}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => window.location.href = '/simple-dashboard'}
+                className="flex-1 bg-white text-gray-700 py-4 px-6 rounded-xl hover:bg-gray-50 border-2 border-gray-200 font-semibold text-lg transition-colors"
+              >
+                <span className="flex items-center justify-center">
+                  <span className="mr-2">📊</span>
+                  Dashboard
+                </span>
+              </button>
+            </div>
+          </form>
+
+          {/* Quick Actions */}
+          <div className="mt-8 pt-6 border-t border-gray-200">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center text-sm text-gray-600">
+                <span className="mr-2">🔒</span>
+                <span>Connected to Twitter</span>
+              </div>
+              <button
+                onClick={resetSetup}
+                className="text-sm text-gray-500 hover:text-gray-700 underline"
+              >
+                Disconnect
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Quick Tips */}
+        <div className="mt-8 bg-white rounded-2xl shadow-lg p-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+            <span className="mr-2">💡</span>
+            Quick Tips
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
+            <div className="flex items-start">
+              <span className="mr-2">⏰</span>
+              <span>Use the Dashboard to manage your tweet queue</span>
+            </div>
+            <div className="flex items-start">
+              <span className="mr-2">📝</span>
+              <span>Build a queue of tweets to post automatically</span>
+            </div>
+            <div className="flex items-start">
+              <span className="mr-2">🎯</span>
+              <span>Keep tweets under 280 characters for best engagement</span>
+            </div>
+            <div className="flex items-start">
+              <span className="mr-2">🔄</span>
+              <span>Set up automated posting schedules</span>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
