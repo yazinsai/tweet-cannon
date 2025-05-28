@@ -14,6 +14,7 @@ import {
   addTweetPostedActivity,
   addTweetFailedActivity
 } from '@/components/ActivityFeed';
+import { getErrorHandler } from '@/lib/errorHandling';
 
 interface SchedulerControlsProps {
   config: PostingConfig;
@@ -46,6 +47,7 @@ const SchedulerControls: React.FC<SchedulerControlsProps> = ({
 
   const scheduler = getScheduler();
   const notifications = useSchedulerNotifications();
+  const errorHandler = getErrorHandler();
 
   useEffect(() => {
     // Set up event listeners
@@ -62,6 +64,20 @@ const SchedulerControls: React.FC<SchedulerControlsProps> = ({
         notifications.notifyTweetPosted(data.tweet?.content || 'Tweet');
         addTweetPostedActivity(data.tweet?.content || 'Tweet', data.tweet?.id || '');
       } else {
+        // Record the error in the error handling system
+        const response = data.errorCode ? { status: parseInt(data.errorCode) } : undefined;
+        const error = {
+          message: data.error || 'Unknown error',
+          code: data.errorCode
+        };
+
+        errorHandler.recordError(
+          data.tweetId || data.tweet?.id || 'unknown',
+          data.tweet?.content || 'Tweet content unavailable',
+          error,
+          response
+        );
+
         notifications.notifyTweetFailed(data.tweet?.content || 'Tweet', data.error || 'Unknown error');
         addTweetFailedActivity(data.tweet?.content || 'Tweet', data.error || 'Unknown error', data.tweet?.id || '');
       }

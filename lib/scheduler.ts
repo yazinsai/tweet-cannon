@@ -43,6 +43,7 @@ class SchedulerService {
       this.loadPersistedState();
       this.initializeWorker();
       this.setupPageLifecycleHandlers();
+      this.setupRetryEventListener();
     }
   }
 
@@ -382,6 +383,76 @@ class SchedulerService {
       }
     } catch (error) {
       console.error('Failed to auto-restart scheduler:', error);
+    }
+  }
+
+  private setupRetryEventListener() {
+    // Listen for retry events from the error handler
+    window.addEventListener('tweetRetry', (event: CustomEvent) => {
+      const { error } = event.detail;
+      console.log('Retry event received for error:', error.id);
+
+      // Attempt to retry the tweet
+      this.retryTweet(error);
+    });
+  }
+
+  private async retryTweet(error: any) {
+    try {
+      // Get current session and tweet data
+      const { getUserSession, getTweets } = require('./storage');
+      const session = await getUserSession();
+      const tweets = getTweets();
+
+      // Find the tweet to retry
+      const tweet = tweets.find((t: any) => t.id === error.tweetId);
+      if (!tweet || !session) {
+        console.error('Cannot retry: tweet or session not found');
+        return;
+      }
+
+      // Post the tweet directly (bypass scheduler queue)
+      const response = await fetch('/api/tweet', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: tweet.content,
+          cookies: session.cookies,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // Success - resolve the error and update tweet status
+        const { getErrorHandler } = require('./errorHandling');
+        const { updateTweet } = require('./storage');
+
+        getErrorHandler().resolveError(error.id);
+        updateTweet({ id: tweet.id, status: 'posted' });
+
+        // Emit success event
+        this.emit('retrySuccess', { error, tweet });
+
+        console.log('Retry successful for tweet:', tweet.id);
+      } else {
+        // Failed - record new error
+        const { getErrorHandler } = require('./errorHandling');
+        getErrorHandler().recordError(
+          tweet.id,
+          tweet.content,
+          { message: data.error, code: data.code },
+          response
+        );
+
+        // Emit failure event
+        this.emit('retryFailed', { error, tweet, newError: data.error });
+
+        console.error('Retry failed for tweet:', tweet.id, data.error);
+      }
+    } catch (retryError) {
+      console.error('Error during retry:', retryError);
+      this.emit('retryFailed', { error, retryError });
     }
   }
 

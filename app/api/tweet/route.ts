@@ -152,15 +152,46 @@ export async function POST(request: NextRequest) {
       const errorText = await response.text();
       console.error('Twitter API error:', errorText);
 
+      // Enhanced error classification for better error handling
+      let errorMessage = `Failed to post tweet: ${response.status} ${response.statusText}`;
+      let errorCode = response.status.toString();
+
       if (response.status === 401 || response.status === 403) {
-        return NextResponse.json(
-          { error: 'Authentication failed. Please re-authenticate with Twitter.' },
-          { status: 401 }
-        );
+        errorMessage = 'Authentication failed. Please re-authenticate with Twitter.';
+      } else if (response.status === 429) {
+        errorMessage = 'Rate limit exceeded. Please try again later.';
+      } else if (response.status === 400) {
+        // Try to parse Twitter-specific error codes
+        try {
+          const errorData = JSON.parse(errorText);
+          if (errorData.errors) {
+            const twitterError = errorData.errors[0];
+            if (twitterError.code === 187) {
+              errorMessage = 'Duplicate tweet detected.';
+              errorCode = '187';
+            } else if (twitterError.code === 324) {
+              errorMessage = 'Tweet content violates Twitter policies.';
+              errorCode = '324';
+            } else {
+              errorMessage = twitterError.message || errorMessage;
+              errorCode = twitterError.code?.toString() || errorCode;
+            }
+          }
+        } catch (parseError) {
+          // If parsing fails, use the original error
+        }
+      } else if (response.status >= 500) {
+        errorMessage = 'Twitter server error. Please try again later.';
       }
 
       return NextResponse.json(
-        { error: `Failed to post tweet: ${response.status} ${response.statusText}`, details: errorText },
+        {
+          error: errorMessage,
+          code: errorCode,
+          details: errorText,
+          timestamp: new Date().toISOString(),
+          retryable: [429, 500, 502, 503, 504].includes(response.status)
+        },
         { status: response.status }
       );
     }
@@ -178,8 +209,35 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('Tweet posting error:', error);
+
+    // Classify the error type for better handling
+    let errorMessage = 'Internal server error';
+    let errorCode = '500';
+    let retryable = true;
+
+    if (error instanceof Error) {
+      errorMessage = error.message;
+
+      // Network errors are typically retryable
+      if (error.message.includes('fetch') || error.message.includes('network')) {
+        errorMessage = 'Network error. Please check your connection.';
+        errorCode = 'NETWORK_ERROR';
+        retryable = true;
+      } else if (error.message.includes('timeout')) {
+        errorMessage = 'Request timeout. Please try again.';
+        errorCode = 'TIMEOUT';
+        retryable = true;
+      }
+    }
+
     return NextResponse.json(
-      { error: 'Internal server error', details: error instanceof Error ? error.message : 'Unknown error' },
+      {
+        error: errorMessage,
+        code: errorCode,
+        details: error instanceof Error ? error.message : 'Unknown error',
+        timestamp: new Date().toISOString(),
+        retryable
+      },
       { status: 500 }
     );
   }

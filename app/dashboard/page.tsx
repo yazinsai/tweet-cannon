@@ -10,6 +10,8 @@ import { AuthSettings } from '@/components/AuthSettings';
 import { SchedulerControls } from '@/components/SchedulerControls';
 import { StatusMonitor } from '@/components/StatusMonitor';
 import { ActivityFeed } from '@/components/ActivityFeed';
+import { ErrorDashboard } from '@/components/ErrorDashboard';
+import { RetrySettings } from '@/components/RetrySettings';
 import { Button } from '@/components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
@@ -20,7 +22,7 @@ const DashboardPage: React.FC = () => {
   const [tweets, setTweets] = useState<Tweet[]>([]);
   const [session, setSession] = useState<UserSession | null>(null);
   const [config, setConfig] = useState<PostingConfig | null>(null);
-  const [activeTab, setActiveTab] = useState<'queue' | 'scheduler' | 'monitor' | 'settings'>('queue');
+  const [activeTab, setActiveTab] = useState<'queue' | 'scheduler' | 'monitor' | 'errors' | 'settings'>('queue');
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -90,6 +92,7 @@ const DashboardPage: React.FC = () => {
     { id: 'queue' as const, label: 'Tweet Queue', icon: '📝' },
     { id: 'scheduler' as const, label: 'Scheduler', icon: '🤖' },
     { id: 'monitor' as const, label: 'Monitor', icon: '📊' },
+    { id: 'errors' as const, label: 'Errors', icon: '🚨' },
     { id: 'settings' as const, label: 'Settings', icon: '⚙️' },
   ];
 
@@ -154,6 +157,13 @@ const DashboardPage: React.FC = () => {
                   variant={activeTab === 'monitor' ? 'primary' : 'secondary'}
                 >
                   📊 Monitor
+                </Button>
+                <Button
+                  className="w-full"
+                  onClick={() => setActiveTab('errors')}
+                  variant={activeTab === 'errors' ? 'primary' : 'secondary'}
+                >
+                  🚨 Errors
                 </Button>
                 <Button
                   className="w-full"
@@ -261,6 +271,16 @@ const DashboardPage: React.FC = () => {
 
             {/* Activity Feed */}
             <ActivityFeed />
+          </div>
+        )}
+
+        {activeTab === 'errors' && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Error Dashboard */}
+            <ErrorDashboard />
+
+            {/* Retry Settings */}
+            <RetrySettings />
           </div>
         )}
 
