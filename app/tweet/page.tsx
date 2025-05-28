@@ -10,12 +10,20 @@ export default function TweetPage() {
   const [isSetupMode, setIsSetupMode] = useState(true);
   const [validationStatus, setValidationStatus] = useState<'idle' | 'validating' | 'valid' | 'invalid'>('idle');
 
-  // Check if we have saved cookies on load
+  // Check if we have saved session on load
   useEffect(() => {
-    const savedCookies = localStorage.getItem('twitter_cookies');
-    if (savedCookies) {
-      setIsSetupMode(false);
-    }
+    const checkSession = async () => {
+      try {
+        const { getUserSession } = await import('@/lib/storage');
+        const session = await getUserSession();
+        if (session && session.isValid) {
+          setIsSetupMode(false);
+        }
+      } catch (error) {
+        console.error('Failed to check session:', error);
+      }
+    };
+    checkSession();
   }, []);
 
   const extractAndValidateCookies = async () => {
@@ -45,8 +53,18 @@ export default function TweetPage() {
       const data = await response.json();
 
       if (response.ok && data.valid) {
-        // Save cookies to localStorage
-        localStorage.setItem('twitter_cookies', fullCookieString);
+        // Save session using encrypted storage
+        const { saveUserSession } = await import('@/lib/storage');
+        const { UserSession } = await import('@/lib/types');
+
+        const newSession = {
+          cookies: fullCookieString,
+          isValid: true,
+          lastValidated: new Date(),
+          username: data.username,
+        };
+
+        await saveUserSession(newSession);
         setValidationStatus('valid');
         setIsSetupMode(false);
         alert('✅ Cookies validated and saved! You can now post tweets.');
@@ -65,9 +83,11 @@ export default function TweetPage() {
     setIsLoading(true);
 
     try {
-      // Get saved cookies from localStorage
-      const savedCookies = localStorage.getItem('twitter_cookies');
-      if (!savedCookies) {
+      // Get saved session from encrypted storage
+      const { getUserSession } = await import('@/lib/storage');
+      const session = await getUserSession();
+
+      if (!session || !session.isValid || !session.cookies) {
         alert('❌ No authentication cookies found. Please set up authentication first.');
         setIsSetupMode(true);
         return;
@@ -78,7 +98,7 @@ export default function TweetPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           message,
-          cookies: savedCookies
+          cookies: session.cookies
         }),
       });
 
@@ -97,8 +117,13 @@ export default function TweetPage() {
     }
   };
 
-  const resetSetup = () => {
-    localStorage.removeItem('twitter_cookies');
+  const resetSetup = async () => {
+    try {
+      const { clearUserSession } = await import('@/lib/storage');
+      clearUserSession();
+    } catch (error) {
+      console.error('Failed to clear session:', error);
+    }
     setIsSetupMode(true);
     setCookieString('');
     setAuthToken('');

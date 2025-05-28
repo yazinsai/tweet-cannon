@@ -15,7 +15,9 @@ export default function Home() {
         <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
           ✅ <strong>Task 2 Complete:</strong> Core data models and local storage system implemented!<br/>
           ✅ <strong>Task 4 Complete:</strong> Cookie authentication and validation system implemented!<br/>
-          📊 <strong>Progress:</strong> 3/10 tasks completed (30%)
+          ✅ <strong>Task 5 Complete:</strong> Manual tweet posting via Twitter API implemented!<br/>
+          🚧 <strong>Task 3 In Progress:</strong> Building UI components for tweet queue and settings!<br/>
+          📊 <strong>Progress:</strong> 4/10 tasks completed (40%)
         </div>
 
         <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
@@ -38,16 +40,22 @@ export default function Home() {
 
         <div className="flex gap-4 items-center flex-col sm:flex-row">
           <Link
+            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-blue-600 text-white gap-2 hover:bg-blue-700 font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
+            href="/dashboard"
+          >
+            📊 Open Dashboard
+          </Link>
+          <Link
             className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-red-600 text-white gap-2 hover:bg-red-700 font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
             href="/tweet"
           >
-            🚀 Start Tweeting
+            🚀 Quick Post
           </Link>
           <Link
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-blue-600 text-white gap-2 hover:bg-blue-700 font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
+            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-green-600 text-white gap-2 hover:bg-green-700 font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
             href="/test-storage"
           >
-            🧪 Test Storage System
+            🧪 Test Storage
           </Link>
           <a
             className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto"

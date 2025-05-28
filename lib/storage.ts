@@ -241,6 +241,85 @@ export function getTweet(id: string): Tweet | null {
   return tweets.find(t => t.id === id) || null;
 }
 
+/**
+ * Reorder tweets in the queue
+ */
+export function reorderTweets(fromIndex: number, toIndex: number): Tweet[] {
+  const tweets = getTweets();
+
+  if (fromIndex < 0 || fromIndex >= tweets.length || toIndex < 0 || toIndex >= tweets.length) {
+    throw new Error('Invalid reorder indices');
+  }
+
+  // Remove the tweet from its current position
+  const [movedTweet] = tweets.splice(fromIndex, 1);
+
+  // Insert it at the new position
+  tweets.splice(toIndex, 0, movedTweet);
+
+  saveTweets(tweets);
+  return tweets;
+}
+
+/**
+ * Move a tweet to a specific position
+ */
+export function moveTweet(tweetId: string, newIndex: number): Tweet[] {
+  const tweets = getTweets();
+  const currentIndex = tweets.findIndex(t => t.id === tweetId);
+
+  if (currentIndex === -1) {
+    throw new Error(ERROR_MESSAGES.TWEET_NOT_FOUND);
+  }
+
+  if (newIndex < 0 || newIndex >= tweets.length) {
+    throw new Error('Invalid target position');
+  }
+
+  return reorderTweets(currentIndex, newIndex);
+}
+
+/**
+ * Bulk update tweet statuses
+ */
+export function bulkUpdateTweetStatus(tweetIds: string[], status: Tweet['status']): Tweet[] {
+  const tweets = getTweets();
+  let updated = false;
+
+  tweets.forEach(tweet => {
+    if (tweetIds.includes(tweet.id)) {
+      tweet.status = status;
+      if (status === 'posted' && !tweet.postedAt) {
+        tweet.postedAt = new Date();
+      }
+      updated = true;
+    }
+  });
+
+  if (updated) {
+    saveTweets(tweets);
+  }
+
+  return tweets;
+}
+
+/**
+ * Bulk delete tweets
+ */
+export function bulkDeleteTweets(tweetIds: string[]): boolean {
+  const tweets = getTweets();
+  const initialLength = tweets.length;
+
+  const filteredTweets = tweets.filter(tweet => !tweetIds.includes(tweet.id));
+
+  if (filteredTweets.length !== initialLength) {
+    saveTweets(filteredTweets);
+    return true;
+  }
+
+  return false;
+}
+
 // Configuration Management
 
 /**
