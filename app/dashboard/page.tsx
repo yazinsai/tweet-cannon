@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Layout } from '@/components/Layout';
 import { TweetInput } from '@/components/TweetInput';
 import { TweetQueue } from '@/components/TweetQueue';
 import { QueueStats } from '@/components/QueueStats';
@@ -12,9 +11,7 @@ import { StatusMonitor } from '@/components/StatusMonitor';
 import { ActivityFeed } from '@/components/ActivityFeed';
 import { ErrorDashboard } from '@/components/ErrorDashboard';
 import { RetrySettings } from '@/components/RetrySettings';
-import { Button } from '@/components/ui/Button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
-import { Badge } from '@/components/ui/Badge';
+
 import { Tweet, PostingConfig, UserSession } from '@/lib/types';
 import { getTweets, getUserSession, getPostingConfig } from '@/lib/storage';
 
@@ -97,14 +94,12 @@ const DashboardPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <Layout>
-        <div className="flex items-center justify-center min-h-[400px]">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading dashboard...</p>
-          </div>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading dashboard...</p>
         </div>
-      </Layout>
+      </div>
     );
   }
 

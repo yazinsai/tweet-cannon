@@ -46,7 +46,6 @@ const SimpleDashboard: React.FC = () => {
     try {
       const tweet = addTweet({
         content: newTweet.trim(),
-        scheduledFor: null,
       });
 
       setTweets(prev => [tweet, ...prev]);

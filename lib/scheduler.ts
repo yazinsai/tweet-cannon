@@ -388,8 +388,9 @@ class SchedulerService {
 
   private setupRetryEventListener() {
     // Listen for retry events from the error handler
-    window.addEventListener('tweetRetry', (event: CustomEvent) => {
-      const { error } = event.detail;
+    window.addEventListener('tweetRetry', (event: Event) => {
+      const customEvent = event as CustomEvent;
+      const { error } = customEvent.detail;
       console.log('Retry event received for error:', error.id);
 
       // Attempt to retry the tweet

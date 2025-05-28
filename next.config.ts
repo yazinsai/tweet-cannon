@@ -5,10 +5,7 @@ const nextConfig: NextConfig = {
   output: 'standalone',
 
   // Optimize for production
-  experimental: {
-    // Enable server components optimization
-    serverComponentsExternalPackages: [],
-  },
+  serverExternalPackages: [],
 
   // Security headers
   async headers() {

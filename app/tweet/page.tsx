@@ -56,7 +56,6 @@ export default function TweetPage() {
       if (response.ok && data.valid) {
         // Save session using encrypted storage
         const { saveUserSession } = await import('@/lib/storage');
-        const { UserSession } = await import('@/lib/types');
 
         const newSession = {
           cookies: fullCookieString,

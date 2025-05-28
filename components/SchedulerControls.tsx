@@ -65,7 +65,6 @@ const SchedulerControls: React.FC<SchedulerControlsProps> = ({
         addTweetPostedActivity(data.tweet?.content || 'Tweet', data.tweet?.id || '');
       } else {
         // Record the error in the error handling system
-        const response = data.errorCode ? { status: parseInt(data.errorCode) } : undefined;
         const error = {
           message: data.error || 'Unknown error',
           code: data.errorCode
@@ -75,7 +74,7 @@ const SchedulerControls: React.FC<SchedulerControlsProps> = ({
           data.tweetId || data.tweet?.id || 'unknown',
           data.tweet?.content || 'Tweet content unavailable',
           error,
-          response
+          undefined
         );
 
         notifications.notifyTweetFailed(data.tweet?.content || 'Tweet', data.error || 'Unknown error');

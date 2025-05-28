@@ -1,0 +1,57 @@
+name: Deploy to Dokku
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Run linter
+      run: npm run lint
+
+    - name: Build application
+      run: npm run build
+
+    - name: Test Docker build
+      run: |
+        docker build -t tweet-cannon-test .
+        docker run --rm tweet-cannon-test node healthcheck.js
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Deploy to Dokku
+      uses: dokku/github-action@master
+      with:
+        git_remote_url: 'ssh://dokku@${{ secrets.DOKKU_HOST }}:22/tweet-cannon'
+        ssh_private_key: ${{ secrets.DOKKU_SSH_PRIVATE_KEY }}
+
+    - name: Health check
+      run: |
+        sleep 30
+        curl -f https://tweet-cannon.${{ secrets.DOKKU_HOST }}/api/health
