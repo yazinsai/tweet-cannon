@@ -1,0 +1,200 @@
+<context>
+# Overview  
+Tweet Cannon is a simple web application that automates Twitter posting by allowing users to queue tweets and post them automatically at randomized intervals. The app solves the problem of manual tweet scheduling and helps users maintain consistent social media presence without looking automated. It's designed for content creators, marketers, and social media managers who want to batch-create content and have it posted naturally over time.
+
+# Core Features  
+## Tweet Queue Management
+- **Bulk Tweet Input**: Users can paste or type multiple tweets into a simple interface
+- **Queue Visualization**: Display all queued tweets in an organized list with status indicators
+- **Tweet Editing**: Allow users to edit, delete, or reorder tweets before they're posted
+- **Import/Export**: Support for importing tweet lists from text files and exporting queues
+
+## Automated Posting System
+- **Configurable Cadence**: Users set posting frequency (e.g., every 2-4 hours, 3 times per day)
+- **Smart Randomization**: Posts tweets at random times within the specified cadence window (±15-30 minutes)
+- **Queue Processing**: Automatically selects and posts the next tweet in queue
+- **Posting Controls**: Pause, resume, or stop the automated posting system
+
+## Simple Authentication
+- **Cookie-Based Auth**: Users paste Twitter session cookies for authentication
+- **Cookie Helper Script**: Provide a JavaScript snippet users can run in browser console to extract cookies
+- **Session Management**: Validate cookies and handle expiration gracefully
+- **Security**: Store cookies securely with basic encryption
+
+## Posting History & Monitoring
+- **Posted Tweet Log**: Track successfully posted tweets with timestamps
+- **Error Handling**: Log and display failed posting attempts with retry options
+- **Status Dashboard**: Real-time view of queue status, next posting time, and system health
+
+# User Experience  
+## User Personas
+- **Content Creator**: Wants to batch-write tweets and maintain consistent posting
+- **Social Media Manager**: Needs to schedule content across multiple accounts
+- **Casual User**: Wants simple automation without complex scheduling tools
+
+## Key User Flows
+1. **Setup Flow**: 
+   - User visits app → Runs cookie extraction script → Pastes cookies → Validates authentication
+2. **Content Flow**: 
+   - User adds tweets to queue → Sets posting cadence → Starts automated posting
+3. **Management Flow**: 
+   - User monitors posting status → Edits queue as needed → Adjusts settings
+
+## UI/UX Considerations
+- **Minimal Interface**: Clean, simple design focused on core functionality
+- **Mobile Responsive**: Works well on desktop and mobile devices
+- **Real-time Updates**: Live status updates without page refreshes
+- **Error States**: Clear error messages and recovery instructions
+</context>
+<PRD>
+# Technical Architecture  
+## System Components
+- **Frontend**: Next.js 15 with React 19, TypeScript, and Tailwind CSS
+- **Backend**: Next.js API routes for tweet processing and scheduling
+- **Storage**: Local browser storage (localStorage) for MVP, with database option for future
+- **Scheduler**: Browser-based interval system with Web Workers for background processing
+- **Twitter Integration**: Direct API calls using user-provided session cookies
+
+## Data Models
+```typescript
+interface Tweet {
+  id: string;
+  content: string;
+  status: 'queued' | 'posting' | 'posted' | 'failed';
+  createdAt: Date;
+  scheduledFor?: Date;
+  postedAt?: Date;
+  error?: string;
+}
+
+interface PostingConfig {
+  enabled: boolean;
+  cadence: 'hourly' | 'daily' | 'custom';
+  interval: number; // hours
+  randomWindow: number; // minutes
+  nextPostTime?: Date;
+}
+
+interface UserSession {
+  cookies: string;
+  isValid: boolean;
+  lastValidated: Date;
+  username?: string;
+}
+```
+
+## APIs and Integrations
+- **Twitter Web API**: Use session cookies to post tweets via Twitter's internal endpoints
+- **Cookie Validation**: Endpoint to verify Twitter session validity
+- **Tweet Posting**: Secure endpoint that handles actual tweet submission
+- **Queue Management**: CRUD operations for tweet queue
+
+## Infrastructure Requirements
+- **Client-side Storage**: localStorage for tweet queue and user preferences
+- **Background Processing**: Service Worker or Web Worker for scheduling
+- **Security**: Cookie encryption and secure storage
+- **Error Handling**: Robust retry logic and user notifications
+
+# Development Roadmap  
+## Phase 1: MVP Core (Essential Features)
+- Basic tweet queue interface (add, edit, delete tweets)
+- Simple posting cadence configuration
+- Cookie-based Twitter authentication
+- Manual tweet posting functionality
+- Basic error handling and user feedback
+
+## Phase 2: Automation Engine
+- Automated posting scheduler with randomization
+- Background processing for posting
+- Queue status monitoring and real-time updates
+- Posting history and success/failure tracking
+- Pause/resume functionality
+
+## Phase 3: Enhanced UX
+- Bulk tweet import from text files
+- Advanced scheduling options (specific times, days)
+- Tweet preview and validation
+- Mobile-responsive design improvements
+- Better error recovery and retry mechanisms
+
+## Phase 4: Advanced Features
+- Multiple account support
+- Tweet analytics and performance tracking
+- Template system for recurring content
+- Export functionality for posting history
+- Advanced randomization algorithms
+
+# Logical Dependency Chain
+## Foundation Layer (Build First)
+1. **Next.js App Structure**: Set up basic routing and layout components
+2. **Tweet Data Models**: Define TypeScript interfaces and data structures
+3. **Local Storage System**: Implement client-side data persistence
+4. **Basic UI Components**: Create tweet input, queue display, and settings forms
+
+## Core Functionality (Build Second)
+1. **Cookie Authentication**: Implement cookie extraction script and validation
+2. **Manual Tweet Posting**: Build the core Twitter API integration
+3. **Queue Management**: Complete CRUD operations for tweet management
+4. **Basic Scheduling**: Implement simple time-based posting
+
+## Automation Layer (Build Third)
+1. **Background Scheduler**: Implement automated posting with randomization
+2. **Real-time Updates**: Add live status monitoring and notifications
+3. **Error Handling**: Robust retry logic and user feedback systems
+4. **Advanced Controls**: Pause/resume and queue manipulation features
+
+## Polish & Enhancement (Build Last)
+1. **Mobile Responsiveness**: Optimize for all device sizes
+2. **Advanced Features**: Import/export, analytics, multiple accounts
+3. **Performance Optimization**: Efficient background processing
+4. **User Experience**: Smooth animations, better error states
+
+# Risks and Mitigations  
+## Technical Challenges
+- **Twitter API Changes**: Risk of Twitter changing internal endpoints
+  - *Mitigation*: Build flexible API layer, monitor for changes, have fallback options
+- **Cookie Expiration**: User sessions may expire unexpectedly
+  - *Mitigation*: Implement automatic validation, clear expiration handling, easy re-authentication
+- **Browser Limitations**: Background processing constraints in browsers
+  - *Mitigation*: Use Service Workers, implement efficient scheduling, graceful degradation
+
+## MVP Scope Management
+- **Feature Creep**: Risk of over-engineering the initial version
+  - *Mitigation*: Strict MVP scope, focus on core posting functionality first
+- **Authentication Complexity**: Cookie-based auth may be fragile
+  - *Mitigation*: Start simple, provide clear user instructions, robust error handling
+
+## Resource Constraints
+- **Development Time**: Balancing features with quick delivery
+  - *Mitigation*: Prioritize core functionality, iterative development approach
+- **Testing Complexity**: Difficult to test Twitter integration without real accounts
+  - *Mitigation*: Mock API responses, careful staging environment testing
+
+# Appendix  
+## Cookie Extraction Script
+```javascript
+// Script for users to run in browser console
+function getTweetCannonCookies() {
+  const cookies = document.cookie;
+  const authToken = cookies.match(/auth_token=([^;]+)/)?.[1];
+  const ct0 = cookies.match(/ct0=([^;]+)/)?.[1];
+  
+  if (authToken && ct0) {
+    return JSON.stringify({ auth_token: authToken, ct0: ct0 });
+  } else {
+    return "Error: Required cookies not found. Make sure you're logged into Twitter.";
+  }
+}
+
+console.log(getTweetCannonCookies());
+```
+
+## Technical Specifications
+- **Framework**: Next.js 15 with App Router
+- **Language**: TypeScript for type safety
+- **Styling**: Tailwind CSS for rapid UI development
+- **State Management**: React hooks and context for simple state needs
+- **Storage**: localStorage for MVP, IndexedDB for future versions
+- **Background Processing**: Web Workers or Service Workers for scheduling
+- **Security**: Basic cookie encryption using Web Crypto API
+</PRD>
