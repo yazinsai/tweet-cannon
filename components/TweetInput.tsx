@@ -6,6 +6,8 @@ import { Textarea } from '@/components/ui/Input';
 import { Card, CardContent, CardFooter } from '@/components/ui/Card';
 import { addTweet } from '@/lib/storage';
 import { CreateTweetData } from '@/lib/types';
+import { useNotifications } from '@/contexts/NotificationContext';
+import { addTweetAddedActivity } from '@/components/ActivityFeed';
 
 interface TweetInputProps {
   onTweetAdded?: (tweet: any) => void;
@@ -17,6 +19,8 @@ const TweetInput: React.FC<TweetInputProps> = ({ onTweetAdded, className }) => {
   const [scheduledFor, setScheduledFor] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+
+  const notifications = useNotifications();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,14 +34,21 @@ const TweetInput: React.FC<TweetInputProps> = ({ onTweetAdded, className }) => {
       };
 
       const newTweet = addTweet(tweetData);
-      
+
+      // Show success notification and add activity
+      notifications.showSuccess(
+        scheduledFor ? 'Tweet scheduled successfully!' : 'Tweet added to queue!',
+        'Tweet Added'
+      );
+      addTweetAddedActivity(content.trim());
+
       // Reset form
       setContent('');
       setScheduledFor('');
-      
+
       // Notify parent component
       onTweetAdded?.(newTweet);
-      
+
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to add tweet');
     } finally {
@@ -65,7 +76,7 @@ const TweetInput: React.FC<TweetInputProps> = ({ onTweetAdded, className }) => {
             rows={4}
             disabled={isLoading}
           />
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Schedule for later (optional)
@@ -80,14 +91,14 @@ const TweetInput: React.FC<TweetInputProps> = ({ onTweetAdded, className }) => {
             />
           </div>
         </CardContent>
-        
+
         <CardFooter className="flex justify-between items-center">
           <div className="text-sm text-gray-500">
             {scheduledFor && (
               <span>📅 Scheduled for {new Date(scheduledFor).toLocaleString()}</span>
             )}
           </div>
-          
+
           <Button
             type="submit"
             disabled={isEmpty || isOverLimit || isLoading}

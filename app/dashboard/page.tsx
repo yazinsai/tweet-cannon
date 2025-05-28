@@ -7,6 +7,9 @@ import { TweetQueue } from '@/components/TweetQueue';
 import { QueueStats } from '@/components/QueueStats';
 import { PostingSettings } from '@/components/PostingSettings';
 import { AuthSettings } from '@/components/AuthSettings';
+import { SchedulerControls } from '@/components/SchedulerControls';
+import { StatusMonitor } from '@/components/StatusMonitor';
+import { ActivityFeed } from '@/components/ActivityFeed';
 import { Button } from '@/components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
@@ -17,7 +20,7 @@ const DashboardPage: React.FC = () => {
   const [tweets, setTweets] = useState<Tweet[]>([]);
   const [session, setSession] = useState<UserSession | null>(null);
   const [config, setConfig] = useState<PostingConfig | null>(null);
-  const [activeTab, setActiveTab] = useState<'queue' | 'settings'>('queue');
+  const [activeTab, setActiveTab] = useState<'queue' | 'scheduler' | 'monitor' | 'settings'>('queue');
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -29,19 +32,19 @@ const DashboardPage: React.FC = () => {
   const loadData = async () => {
     try {
       setIsLoading(true);
-      
+
       // Load tweets
       const storedTweets = getTweets();
       setTweets(storedTweets);
-      
+
       // Load session
       const currentSession = await getUserSession();
       setSession(currentSession);
-      
+
       // Load config
       const currentConfig = getPostingConfig();
       setConfig(currentConfig);
-      
+
     } catch (error) {
       console.error('Failed to load dashboard data:', error);
     } finally {
@@ -55,8 +58,8 @@ const DashboardPage: React.FC = () => {
   };
 
   const handleTweetUpdated = (updatedTweet: Tweet) => {
-    setTweets(prev => 
-      prev.map(tweet => 
+    setTweets(prev =>
+      prev.map(tweet =>
         tweet.id === updatedTweet.id ? updatedTweet : tweet
       )
     );
@@ -77,8 +80,16 @@ const DashboardPage: React.FC = () => {
     setSession(newSession);
   };
 
+  const handleSchedulerTweetPosted = () => {
+    // Refresh tweets and stats when scheduler posts a tweet
+    loadData();
+    setRefreshTrigger(prev => prev + 1);
+  };
+
   const tabs = [
     { id: 'queue' as const, label: 'Tweet Queue', icon: '📝' },
+    { id: 'scheduler' as const, label: 'Scheduler', icon: '🤖' },
+    { id: 'monitor' as const, label: 'Monitor', icon: '📊' },
     { id: 'settings' as const, label: 'Settings', icon: '⚙️' },
   ];
 
@@ -106,14 +117,9 @@ const DashboardPage: React.FC = () => {
               Manage your tweet queue and posting settings
             </p>
           </div>
-          
+
           <div className="flex items-center space-x-2">
-            <Badge variant={session?.isValid ? 'success' : 'danger'}>
-              {session?.isValid ? '🟢 Authenticated' : '🔴 Not Authenticated'}
-            </Badge>
-            <Badge variant={config?.enabled ? 'success' : 'default'}>
-              {config?.enabled ? '🟢 Auto-posting ON' : '⚪ Auto-posting OFF'}
-            </Badge>
+            <StatusMonitor compact />
           </div>
         </div>
 
@@ -128,14 +134,28 @@ const DashboardPage: React.FC = () => {
                 <CardTitle>Quick Actions</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
-                <Button 
-                  className="w-full" 
+                <Button
+                  className="w-full"
                   onClick={() => setActiveTab('queue')}
                   variant={activeTab === 'queue' ? 'primary' : 'secondary'}
                 >
                   📝 Manage Queue
                 </Button>
-                <Button 
+                <Button
+                  className="w-full"
+                  onClick={() => setActiveTab('scheduler')}
+                  variant={activeTab === 'scheduler' ? 'primary' : 'secondary'}
+                >
+                  🤖 Scheduler
+                </Button>
+                <Button
+                  className="w-full"
+                  onClick={() => setActiveTab('monitor')}
+                  variant={activeTab === 'monitor' ? 'primary' : 'secondary'}
+                >
+                  📊 Monitor
+                </Button>
+                <Button
                   className="w-full"
                   onClick={() => setActiveTab('settings')}
                   variant={activeTab === 'settings' ? 'primary' : 'secondary'}
@@ -174,7 +194,7 @@ const DashboardPage: React.FC = () => {
             <div className="lg:col-span-1">
               <TweetInput onTweetAdded={handleTweetAdded} />
             </div>
-            
+
             {/* Tweet Queue */}
             <div className="lg:col-span-2">
               <TweetQueue
@@ -186,11 +206,69 @@ const DashboardPage: React.FC = () => {
           </div>
         )}
 
+        {activeTab === 'scheduler' && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Scheduler Controls */}
+            <SchedulerControls
+              config={config || { enabled: false, cadence: 'daily', interval: 24, randomWindow: 30 }}
+              session={session}
+              onConfigChange={handleConfigUpdated}
+              onTweetPosted={handleSchedulerTweetPosted}
+            />
+
+            {/* Scheduler Info */}
+            <Card>
+              <CardHeader>
+                <CardTitle>How It Works</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="text-sm text-gray-600 space-y-2">
+                  <p>
+                    🤖 The automated scheduler runs in the background using Web Workers
+                  </p>
+                  <p>
+                    ⏰ Posts tweets from your queue at the configured intervals
+                  </p>
+                  <p>
+                    🎲 Adds randomization to posting times to appear more natural
+                  </p>
+                  <p>
+                    📊 Automatically updates tweet statuses and provides real-time feedback
+                  </p>
+                  <p>
+                    ⚡ Continues running even when you close the browser tab
+                  </p>
+                </div>
+
+                <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+                  <p className="text-sm font-medium text-blue-800 mb-1">
+                    💡 Pro Tip
+                  </p>
+                  <p className="text-xs text-blue-600">
+                    Keep this tab open for the best experience. The scheduler will continue
+                    running in the background, but you'll get real-time updates here.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {activeTab === 'monitor' && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Status Monitor */}
+            <StatusMonitor />
+
+            {/* Activity Feed */}
+            <ActivityFeed />
+          </div>
+        )}
+
         {activeTab === 'settings' && (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Authentication Settings */}
             <AuthSettings onAuthUpdated={handleAuthUpdated} />
-            
+
             {/* Posting Settings */}
             <PostingSettings onConfigUpdated={handleConfigUpdated} />
           </div>

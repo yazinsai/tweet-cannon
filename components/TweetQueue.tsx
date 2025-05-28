@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { TweetCard } from './TweetCard';
+import { BulkActions } from './BulkActions';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
@@ -24,6 +25,8 @@ const TweetQueue: React.FC<TweetQueueProps> = ({
   const [tweets, setTweets] = useState<Tweet[]>([]);
   const [filter, setFilter] = useState<TweetStatus | 'all'>('all');
   const [sortBy, setSortBy] = useState<'created' | 'scheduled'>('created');
+  const [selectedTweets, setSelectedTweets] = useState<string[]>([]);
+  const [isSelectionMode, setIsSelectionMode] = useState(false);
 
   // Load tweets from storage if not provided as props
   useEffect(() => {
@@ -52,8 +55,8 @@ const TweetQueue: React.FC<TweetQueueProps> = ({
     });
 
   const handleTweetUpdated = (updatedTweet: Tweet) => {
-    setTweets(prev => 
-      prev.map(tweet => 
+    setTweets(prev =>
+      prev.map(tweet =>
         tweet.id === updatedTweet.id ? updatedTweet : tweet
       )
     );
@@ -62,7 +65,37 @@ const TweetQueue: React.FC<TweetQueueProps> = ({
 
   const handleTweetDeleted = (tweetId: string) => {
     setTweets(prev => prev.filter(tweet => tweet.id !== tweetId));
+    setSelectedTweets(prev => prev.filter(id => id !== tweetId));
     onTweetDeleted?.(tweetId);
+  };
+
+  const handleBulkAction = (updatedTweets: Tweet[]) => {
+    setTweets(updatedTweets);
+  };
+
+  const handleToggleSelection = (tweetId: string) => {
+    setSelectedTweets(prev =>
+      prev.includes(tweetId)
+        ? prev.filter(id => id !== tweetId)
+        : [...prev, tweetId]
+    );
+  };
+
+  const handleSelectAll = () => {
+    const allFilteredIds = filteredTweets.map(tweet => tweet.id);
+    setSelectedTweets(allFilteredIds);
+  };
+
+  const handleClearSelection = () => {
+    setSelectedTweets([]);
+    setIsSelectionMode(false);
+  };
+
+  const handleToggleSelectionMode = () => {
+    setIsSelectionMode(!isSelectionMode);
+    if (isSelectionMode) {
+      setSelectedTweets([]);
+    }
   };
 
   // Get counts for each status
@@ -87,11 +120,21 @@ const TweetQueue: React.FC<TweetQueueProps> = ({
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle>Tweet Queue</CardTitle>
-          <Badge variant="info">
-            {filteredTweets.length} tweet{filteredTweets.length !== 1 ? 's' : ''}
-          </Badge>
+          <div className="flex items-center space-x-2">
+            <Badge variant="info">
+              {filteredTweets.length} tweet{filteredTweets.length !== 1 ? 's' : ''}
+            </Badge>
+            <Button
+              size="sm"
+              variant={isSelectionMode ? 'primary' : 'ghost'}
+              onClick={handleToggleSelectionMode}
+              className="text-xs"
+            >
+              {isSelectionMode ? '✅ Selection Mode' : '☑️ Select'}
+            </Button>
+          </div>
         </div>
-        
+
         {/* Filters */}
         <div className="flex flex-wrap gap-2 mt-4">
           {filterOptions.map(option => (
@@ -104,8 +147,8 @@ const TweetQueue: React.FC<TweetQueueProps> = ({
             >
               {option.label}
               {statusCounts[option.value] > 0 && (
-                <Badge 
-                  size="sm" 
+                <Badge
+                  size="sm"
                   variant={option.variant || 'default'}
                   className="ml-1"
                 >
@@ -115,35 +158,73 @@ const TweetQueue: React.FC<TweetQueueProps> = ({
             </Button>
           ))}
         </div>
-        
+
         {/* Sort Options */}
-        <div className="flex items-center gap-2 mt-2">
-          <span className="text-sm text-gray-600">Sort by:</span>
-          <Button
-            size="sm"
-            variant={sortBy === 'created' ? 'primary' : 'ghost'}
-            onClick={() => setSortBy('created')}
-            className="text-xs"
-          >
-            Created
-          </Button>
-          <Button
-            size="sm"
-            variant={sortBy === 'scheduled' ? 'primary' : 'ghost'}
-            onClick={() => setSortBy('scheduled')}
-            className="text-xs"
-          >
-            Scheduled
-          </Button>
+        <div className="flex items-center justify-between mt-2">
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-gray-600">Sort by:</span>
+            <Button
+              size="sm"
+              variant={sortBy === 'created' ? 'primary' : 'ghost'}
+              onClick={() => setSortBy('created')}
+              className="text-xs"
+            >
+              Created
+            </Button>
+            <Button
+              size="sm"
+              variant={sortBy === 'scheduled' ? 'primary' : 'ghost'}
+              onClick={() => setSortBy('scheduled')}
+              className="text-xs"
+            >
+              Scheduled
+            </Button>
+          </div>
+
+          {/* Selection Controls */}
+          {isSelectionMode && filteredTweets.length > 0 && (
+            <div className="flex items-center gap-2">
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={handleSelectAll}
+                className="text-xs"
+              >
+                Select All ({filteredTweets.length})
+              </Button>
+              {selectedTweets.length > 0 && (
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={handleClearSelection}
+                  className="text-xs"
+                >
+                  Clear ({selectedTweets.length})
+                </Button>
+              )}
+            </div>
+          )}
         </div>
       </CardHeader>
-      
+
       <CardContent>
+        {/* Bulk Actions */}
+        {isSelectionMode && (
+          <div className="mb-4">
+            <BulkActions
+              selectedTweets={selectedTweets}
+              tweets={tweets}
+              onBulkAction={handleBulkAction}
+              onClearSelection={handleClearSelection}
+            />
+          </div>
+        )}
+
         {filteredTweets.length === 0 ? (
           <div className="text-center py-8">
             <div className="text-gray-400 text-4xl mb-2">📝</div>
             <p className="text-gray-600">
-              {filter === 'all' 
+              {filter === 'all'
                 ? 'No tweets in queue yet'
                 : `No ${filter} tweets`
               }
@@ -155,12 +236,32 @@ const TweetQueue: React.FC<TweetQueueProps> = ({
         ) : (
           <div className="space-y-4">
             {filteredTweets.map(tweet => (
-              <TweetCard
+              <div
                 key={tweet.id}
-                tweet={tweet}
-                onTweetUpdated={handleTweetUpdated}
-                onTweetDeleted={handleTweetDeleted}
-              />
+                className={`relative ${
+                  isSelectionMode ? 'cursor-pointer' : ''
+                } ${
+                  selectedTweets.includes(tweet.id) ? 'ring-2 ring-blue-500 rounded-lg' : ''
+                }`}
+                onClick={isSelectionMode ? () => handleToggleSelection(tweet.id) : undefined}
+              >
+                {isSelectionMode && (
+                  <div className="absolute top-2 left-2 z-10">
+                    <input
+                      type="checkbox"
+                      checked={selectedTweets.includes(tweet.id)}
+                      onChange={() => handleToggleSelection(tweet.id)}
+                      className="w-4 h-4 text-blue-600 bg-white border-gray-300 rounded focus:ring-blue-500"
+                    />
+                  </div>
+                )}
+                <TweetCard
+                  tweet={tweet}
+                  onTweetUpdated={handleTweetUpdated}
+                  onTweetDeleted={handleTweetDeleted}
+                  className={isSelectionMode ? 'ml-6' : ''}
+                />
+              </div>
             ))}
           </div>
         )}
