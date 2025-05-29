@@ -15,6 +15,7 @@ interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement
     current: number;
     max: number;
   };
+  dragActive?: boolean;
 }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
@@ -53,7 +54,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
 );
 
 const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
-  ({ className, label, error, helperText, characterCount, id, ...props }, ref) => {
+  ({ className, label, error, helperText, characterCount, dragActive, id, ...props }, ref) => {
     const textareaId = id || `textarea-${Math.random().toString(36).substring(2)}`;
 
     return (
@@ -69,7 +70,10 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
         <textarea
           id={textareaId}
           className={cn(
-            'flex min-h-[80px] w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50',
+            'flex min-h-[80px] w-full rounded-md border bg-white px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 transition-colors',
+            dragActive
+              ? 'border-slate-500 bg-slate-50'
+              : 'border-gray-300',
             error && 'border-red-500 focus:ring-red-500',
             className
           )}

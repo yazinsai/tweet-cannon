@@ -4,6 +4,9 @@ import React, { useState } from 'react';
 import { MediaAttachment } from '@/lib/types';
 import { ImageUpload } from '@/components/ui/ImageUpload';
 import { useTweetPosting } from '@/hooks/useTweetPosting';
+import { createImageEventHandlers } from '@/lib/imageHandlers';
+import { MEDIA_LIMITS } from '@/lib/media';
+import { cn } from '@/lib/utils';
 
 interface TweetComposerProps {
   onSuccess?: (message: string) => void;
@@ -25,8 +28,21 @@ export function TweetComposer({
   const [message, setMessage] = useState('');
   const [images, setImages] = useState<MediaAttachment[]>([]);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [dragActive, setDragActive] = useState(false);
 
   const { isPosting, postTweet } = useTweetPosting();
+
+  // Create image event handlers for the textarea
+  const imageHandlers = createImageEventHandlers(
+    {
+      maxImages: MEDIA_LIMITS.MAX_IMAGES,
+      currentImages: images,
+      onImagesChange: setImages,
+      onError
+    },
+    dragActive,
+    setDragActive
+  );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -76,10 +92,17 @@ export function TweetComposer({
           <textarea
             value={message}
             onChange={(e) => setMessage(e.target.value)}
-            placeholder={placeholder}
-            className="w-full p-4 border border-gray-200 rounded-xl resize-none focus:ring-2 focus:ring-slate-500 focus:border-transparent"
+            placeholder={dragActive ? "Drop images here or continue typing..." : placeholder}
+            className={cn(
+              "w-full p-4 border rounded-xl resize-none focus:ring-2 focus:ring-slate-500 focus:border-transparent transition-colors",
+              dragActive
+                ? "border-slate-500 bg-slate-50"
+                : "border-gray-200",
+              isPosting && "opacity-50"
+            )}
             rows={4}
             disabled={isPosting}
+            {...imageHandlers}
           />
           <div className="flex justify-between items-center mt-2">
             <div className="text-sm text-gray-500">
@@ -97,6 +120,7 @@ export function TweetComposer({
           images={images}
           onImagesChange={setImages}
           disabled={isPosting}
+          compact={true}
         />
 
         <div className="flex justify-end">

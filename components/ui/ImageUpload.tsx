@@ -12,6 +12,7 @@ interface ImageUploadProps {
   maxImages?: number;
   disabled?: boolean;
   className?: string;
+  compact?: boolean; // New prop to control compact mode
 }
 
 const ImageUpload: React.FC<ImageUploadProps> = ({
@@ -19,7 +20,8 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
   onImagesChange,
   maxImages = MEDIA_LIMITS.MAX_IMAGES,
   disabled = false,
-  className
+  className,
+  compact = false
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [dragActive, setDragActive] = useState(false);
@@ -106,12 +108,37 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
   const canAddMore = images.length < maxImages && !disabled;
 
   return (
-    <div className={cn('space-y-3', className)}>
-      {/* Upload Area */}
-      {canAddMore && (
+    <div className={cn('group relative', className)}>
+      {/* Hidden file input */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        multiple
+        accept={MEDIA_LIMITS.SUPPORTED_FORMATS.join(',')}
+        onChange={handleFileSelect}
+        className="hidden"
+        disabled={disabled}
+      />
+
+      {/* Compact mode: Simple button when no images */}
+      {compact && canAddMore && images.length === 0 && !dragActive && (
+        <Button
+          type="button"
+          variant="ghost"
+          onClick={openFileDialog}
+          disabled={disabled}
+          className='absolute -left-3 -top-12'
+        >
+          📷 Add Images
+        </Button>
+      )}
+
+      {/* Full upload area - show when not compact, or when compact with images/dragging */}
+      {canAddMore && (!compact || images.length > 0 || dragActive) && (
         <div
           className={cn(
-            'relative border-2 border-dashed rounded-lg p-6 text-center transition-colors',
+            'relative border-2 border-dashed rounded-lg text-center transition-colors',
+            compact ? 'p-3' : 'p-6',
             dragActive
               ? 'border-slate-500 bg-slate-50'
               : 'border-gray-300 hover:border-gray-400',
@@ -122,16 +149,6 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
           onDragOver={handleDrag}
           onDrop={handleDrop}
         >
-          <input
-            ref={fileInputRef}
-            type="file"
-            multiple
-            accept={MEDIA_LIMITS.SUPPORTED_FORMATS.join(',')}
-            onChange={handleFileSelect}
-            className="hidden"
-            disabled={disabled}
-          />
-
           <div className="space-y-2">
             <div className="text-gray-600">
               📷 Drop images here or{' '}
@@ -144,12 +161,16 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
                 browse
               </button>
             </div>
-            <div className="text-sm text-gray-500">
-              PNG, JPG, GIF up to {MEDIA_LIMITS.MAX_FILE_SIZE / (1024 * 1024)}MB
-            </div>
-            <div className="text-sm text-gray-500">
-              {images.length}/{maxImages} images
-            </div>
+            {!compact && (
+              <>
+                <div className="text-sm text-gray-500">
+                  PNG, JPG, GIF up to {MEDIA_LIMITS.MAX_FILE_SIZE / (1024 * 1024)}MB
+                </div>
+                <div className="text-sm text-gray-500">
+                  {images.length}/{maxImages} images
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}

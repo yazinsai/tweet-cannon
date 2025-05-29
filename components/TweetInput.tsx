@@ -9,6 +9,8 @@ import { addTweet } from '@/lib/storage';
 import { CreateTweetData, MediaAttachment } from '@/lib/types';
 import { useNotifications } from '@/contexts/NotificationContext';
 import { addTweetAddedActivity } from '@/components/ActivityFeed';
+import { createImageEventHandlers } from '@/lib/imageHandlers';
+import { MEDIA_LIMITS } from '@/lib/media';
 
 interface TweetInputProps {
   onTweetAdded?: (tweet: any) => void;
@@ -26,8 +28,21 @@ const TweetInput: React.FC<TweetInputProps> = ({ onTweetAdded, className }) => {
   const [images, setImages] = useState<MediaAttachment[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [dragActive, setDragActive] = useState(false);
 
   const notifications = useNotifications();
+
+  // Create image event handlers for the textarea
+  const imageHandlers = createImageEventHandlers(
+    {
+      maxImages: MEDIA_LIMITS.MAX_IMAGES,
+      currentImages: images,
+      onImagesChange: setImages,
+      onError: setError
+    },
+    dragActive,
+    setDragActive
+  );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -79,7 +94,7 @@ const TweetInput: React.FC<TweetInputProps> = ({ onTweetAdded, className }) => {
         <CardContent className="space-y-4 mt-4">
           <Textarea
             label="What's happening?"
-            placeholder="Enter your tweet..."
+            placeholder={dragActive ? "Drop images here or continue typing..." : "Enter your tweet..."}
             value={content}
             onChange={(e) => setContent(e.target.value)}
             characterCount={{
@@ -89,12 +104,15 @@ const TweetInput: React.FC<TweetInputProps> = ({ onTweetAdded, className }) => {
             error={error}
             rows={4}
             disabled={isLoading}
+            dragActive={dragActive}
+            {...imageHandlers}
           />
 
           <ImageUpload
             images={images}
             onImagesChange={setImages}
             disabled={isLoading}
+            compact={true}
           />
 
           <div>
