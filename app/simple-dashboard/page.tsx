@@ -1,57 +1,36 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
-import { Tweet, PostingConfig, UserSession, MediaAttachment } from '@/lib/types';
-import { getTweets, getUserSession, getPostingConfig, addTweet, updateTweet, deleteTweet } from '@/lib/storage';
+import { MediaAttachment } from '@/lib/types';
 import { ImageUpload } from '@/components/ui/ImageUpload';
+import { AuthGuard } from '@/components/shared/AuthGuard';
+import { AppHeader } from '@/components/shared/AppHeader';
+import { useAppData } from '@/hooks/useAppData';
 
 const SimpleDashboard: React.FC = () => {
-  const [tweets, setTweets] = useState<Tweet[]>([]);
   const [newTweet, setNewTweet] = useState('');
   const [images, setImages] = useState<MediaAttachment[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [schedulerEnabled, setSchedulerEnabled] = useState(false);
 
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  const loadData = async () => {
-    try {
-      setIsLoading(true);
-
-      // Load tweets
-      const storedTweets = getTweets();
-      setTweets(storedTweets);
-
-      // Check authentication
-      const session = await getUserSession();
-      setIsAuthenticated(session?.isValid || false);
-
-      // Check scheduler status
-      const config = getPostingConfig();
-      setSchedulerEnabled(config?.enabled || false);
-
-    } catch (error) {
-      console.error('Failed to load data:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const {
+    isLoading,
+    queuedTweets,
+    postedTweets,
+    schedulerEnabled,
+    addNewTweet,
+    removeExistingTweet,
+  } = useAppData();
 
   const handleAddTweet = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newTweet.trim() && images.length === 0) return;
 
     try {
-      const tweet = addTweet({
+      await addNewTweet({
         content: newTweet.trim(),
         media: images.length > 0 ? images : undefined,
       });
 
-      setTweets(prev => [tweet, ...prev]);
       setNewTweet('');
       setImages([]);
     } catch (error) {
@@ -59,17 +38,13 @@ const SimpleDashboard: React.FC = () => {
     }
   };
 
-  const handleDeleteTweet = (tweetId: string) => {
+  const handleDeleteTweet = async (tweetId: string) => {
     try {
-      deleteTweet(tweetId);
-      setTweets(prev => prev.filter(t => t.id !== tweetId));
+      await removeExistingTweet(tweetId);
     } catch (error) {
       console.error('Failed to delete tweet:', error);
     }
   };
-
-  const queuedTweets = tweets.filter(t => t.status === 'queued');
-  const postedTweets = tweets.filter(t => t.status === 'posted');
 
   if (isLoading) {
     return (
@@ -79,70 +54,28 @@ const SimpleDashboard: React.FC = () => {
     );
   }
 
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
-        <div className="text-center">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded-full mb-4">
-            <span className="text-2xl">🚀</span>
-          </div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Connect to Twitter First</h1>
-          <p className="text-gray-600 mb-6">You need to connect your Twitter account to use the dashboard.</p>
-          <Link
-            href="/tweet"
-            className="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-colors"
-          >
-            <span className="mr-2">🔗</span>
-            Connect Twitter
-          </Link>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      {/* Header */}
-      <div className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center mr-3">
-                <span className="text-xl">🚀</span>
-              </div>
-              <div>
-                <h1 className="text-xl font-bold text-gray-900">Tweet Cannon</h1>
-                <p className="text-sm text-gray-600">Dashboard</p>
-              </div>
-            </div>
+    <AuthGuard>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+        <AppHeader
+          subtitle="Dashboard"
+          showNavigation={true}
+          currentPage="simple-dashboard"
+        />
 
-            <div className="flex items-center space-x-4">
+        {/* Scheduler Status */}
+        <div className="bg-white border-b border-gray-200">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
+            <div className="flex items-center justify-center">
               <div className="flex items-center text-sm">
                 <div className={`w-2 h-2 rounded-full mr-2 ${schedulerEnabled ? 'bg-green-500' : 'bg-gray-400'}`}></div>
                 <span className="text-gray-600">
                   Scheduler {schedulerEnabled ? 'On' : 'Off'}
                 </span>
               </div>
-
-              <Link
-                href="/dashboard"
-                className="inline-flex items-center px-3 py-2 text-gray-600 hover:text-gray-900 font-medium rounded-lg hover:bg-gray-100 transition-colors"
-              >
-                <span className="mr-1">⚙️</span>
-                Advanced
-              </Link>
-
-              <Link
-                href="/tweet"
-                className="inline-flex items-center px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                <span className="mr-1">✍️</span>
-                Quick Tweet
-              </Link>
             </div>
           </div>
         </div>
-      </div>
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -315,7 +248,8 @@ const SimpleDashboard: React.FC = () => {
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </AuthGuard>
   );
 };
 

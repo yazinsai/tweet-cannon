@@ -1,34 +1,32 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { ImageUpload } from '@/components/ui/ImageUpload';
 import { MediaAttachment } from '@/lib/types';
+import { TweetComposer } from '@/components/shared/TweetComposer';
+import { AppHeader } from '@/components/shared/AppHeader';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function TweetPage() {
-  const [message, setMessage] = useState('');
-  const [images, setImages] = useState<MediaAttachment[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
   const [cookieString, setCookieString] = useState('');
   const [authToken, setAuthToken] = useState('');
   const [isSetupMode, setIsSetupMode] = useState(true);
   const [validationStatus, setValidationStatus] = useState<'idle' | 'validating' | 'valid' | 'invalid'>('idle');
-  const [showSuccess, setShowSuccess] = useState(false);
+
+  const { isAuthenticated, updateSession, logout } = useAuth();
 
   // Check if we have saved session on load
   useEffect(() => {
-    const checkSession = async () => {
-      try {
-        const { getUserSession } = await import('@/lib/storage');
-        const session = await getUserSession();
-        if (session && session.isValid) {
-          setIsSetupMode(false);
-        }
-      } catch (error) {
-        console.error('Failed to check session:', error);
-      }
-    };
-    checkSession();
-  }, []);
+    setIsSetupMode(!isAuthenticated);
+  }, [isAuthenticated]);
+
+  const handleTweetSuccess = (message: string) => {
+    // Tweet posted successfully - could add analytics or notifications here
+    console.log('Tweet posted successfully:', message);
+  };
+
+  const handleTweetError = (error: string) => {
+    alert(`❌ Error: ${error}`);
+  };
 
   const extractAndValidateCookies = async () => {
     if (!cookieString.trim()) {
@@ -57,9 +55,6 @@ export default function TweetPage() {
       const data = await response.json();
 
       if (response.ok && data.valid) {
-        // Save session using encrypted storage
-        const { saveUserSession } = await import('@/lib/storage');
-
         const newSession = {
           cookies: fullCookieString,
           isValid: true,
@@ -67,7 +62,7 @@ export default function TweetPage() {
           username: data.username,
         };
 
-        await saveUserSession(newSession);
+        await updateSession(newSession);
         setValidationStatus('valid');
         setIsSetupMode(false);
         alert('✅ Cookies validated and saved! You can now post tweets.');
@@ -163,15 +158,14 @@ export default function TweetPage() {
 
   const resetSetup = async () => {
     try {
-      const { clearUserSession } = await import('@/lib/storage');
-      clearUserSession();
+      await logout();
+      setIsSetupMode(true);
+      setCookieString('');
+      setAuthToken('');
+      setValidationStatus('idle');
     } catch (error) {
       console.error('Failed to clear session:', error);
     }
-    setIsSetupMode(true);
-    setCookieString('');
-    setAuthToken('');
-    setValidationStatus('idle');
   };
 
   if (isSetupMode) {
@@ -322,108 +316,48 @@ export default function TweetPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-2xl mx-auto">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded-full mb-4">
-            <span className="text-2xl">🚀</span>
+        <AppHeader
+          subtitle="What's on your mind today?"
+          showNavigation={true}
+          currentPage="tweet"
+          className="mb-8 rounded-2xl"
+        />
+
+        <TweetComposer
+          onSuccess={handleTweetSuccess}
+          onError={handleTweetError}
+          submitButtonText="🚀 Post Now"
+          className="mb-8"
+        />
+
+        {/* Navigation Actions */}
+        <div className="bg-white rounded-2xl shadow-lg p-6 mb-8">
+          <div className="flex flex-col sm:flex-row gap-4">
+            <button
+              type="button"
+              onClick={() => window.location.href = '/simple-dashboard'}
+              className="flex-1 bg-blue-600 text-white py-4 px-6 rounded-xl hover:bg-blue-700 font-semibold text-lg transition-colors"
+            >
+              <span className="flex items-center justify-center">
+                <span className="mr-2">📊</span>
+                Simple Dashboard
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => window.location.href = '/dashboard'}
+              className="flex-1 bg-white text-gray-700 py-4 px-6 rounded-xl hover:bg-gray-50 border-2 border-gray-200 font-semibold text-lg transition-colors"
+            >
+              <span className="flex items-center justify-center">
+                <span className="mr-2">⚙️</span>
+                Advanced Dashboard
+              </span>
+            </button>
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Tweet Cannon</h1>
-          <p className="text-gray-600">
-            What's on your mind today?
-          </p>
-        </div>
-
-        {/* Success Message */}
-        {showSuccess && (
-          <div className="bg-green-50 border border-green-200 rounded-2xl p-6 mb-8">
-            <div className="flex items-center">
-              <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mr-4">
-                <span className="text-xl">🚀</span>
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-green-900">Tweet Posted Successfully!</h3>
-                <p className="text-green-700">Your tweet has been posted to Twitter.</p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Tweet Composer */}
-        <div className="bg-white rounded-2xl shadow-lg p-8">
-          <form onSubmit={handleTweetSubmit} className="space-y-6">
-            <div>
-              <label htmlFor="message" className="block text-lg font-semibold text-gray-900 mb-4">
-                ✍️ Compose your tweet
-              </label>
-              <div className="relative">
-                <textarea
-                  id="message"
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  placeholder="What's happening?"
-                  className="w-full px-6 py-4 border-2 border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-lg resize-none"
-                  rows={6}
-                  maxLength={280}
-                />
-                <div className="absolute bottom-4 right-4 flex items-center space-x-2">
-                  <div className={`text-sm font-medium ${
-                    message.length > 260 ? 'text-red-500' :
-                    message.length > 240 ? 'text-yellow-500' :
-                    'text-gray-500'
-                  }`}>
-                    {message.length}/280
-                  </div>
-                  {message.length > 260 && (
-                    <span className="text-red-500">⚠️</span>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            <ImageUpload
-              images={images}
-              onImagesChange={setImages}
-              disabled={isLoading}
-            />
-
-            {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4">
-              <button
-                type="submit"
-                disabled={isLoading || (!message.trim() && images.length === 0)}
-                className="flex-1 bg-blue-600 text-white py-4 px-6 rounded-xl hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed font-semibold text-lg transition-colors"
-              >
-                {isLoading ? (
-                  <span className="flex items-center justify-center">
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                    Posting...
-                  </span>
-                ) : (
-                  <span className="flex items-center justify-center">
-                    <span className="mr-2">🚀</span>
-                    Post Now
-                    {images.length > 0 && (
-                      <span className="ml-2">📷 {images.length}</span>
-                    )}
-                  </span>
-                )}
-              </button>
-
-              <button
-                type="button"
-                onClick={() => window.location.href = '/simple-dashboard'}
-                className="flex-1 bg-white text-gray-700 py-4 px-6 rounded-xl hover:bg-gray-50 border-2 border-gray-200 font-semibold text-lg transition-colors"
-              >
-                <span className="flex items-center justify-center">
-                  <span className="mr-2">📊</span>
-                  Dashboard
-                </span>
-              </button>
-            </div>
-          </form>
 
           {/* Quick Actions */}
-          <div className="mt-8 pt-6 border-t border-gray-200">
+          <div className="mt-6 pt-6 border-t border-gray-200">
             <div className="flex items-center justify-between">
               <div className="flex items-center text-sm text-gray-600">
                 <span className="mr-2">🔒</span>

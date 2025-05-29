@@ -13,77 +13,59 @@ import { ActivityFeed } from '@/components/ActivityFeed';
 import { ErrorDashboard } from '@/components/ErrorDashboard';
 import { RetrySettings } from '@/components/RetrySettings';
 
+import { AuthGuard } from '@/components/shared/AuthGuard';
+import { AppHeader } from '@/components/shared/AppHeader';
 import { Tweet, PostingConfig, UserSession } from '@/lib/types';
-import { getTweets, getUserSession, getPostingConfig } from '@/lib/storage';
+import { useAppData } from '@/hooks/useAppData';
 
 const DashboardPage: React.FC = () => {
-  const [tweets, setTweets] = useState<Tweet[]>([]);
-  const [session, setSession] = useState<UserSession | null>(null);
-  const [config, setConfig] = useState<PostingConfig | null>(null);
   const [activeTab, setActiveTab] = useState<'queue' | 'scheduler' | 'settings'>('queue');
   const [refreshTrigger, setRefreshTrigger] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
   const [showAdvanced, setShowAdvanced] = useState(false);
 
-  // Load initial data
+  const {
+    isLoading,
+    tweets,
+    session,
+    config,
+    addNewTweet,
+    updateExistingTweet,
+    removeExistingTweet,
+    updateConfig,
+    refreshAll,
+  } = useAppData();
+
+  // Refresh data when refreshTrigger changes
   useEffect(() => {
-    loadData();
-  }, []);
-
-  const loadData = async () => {
-    try {
-      setIsLoading(true);
-
-      // Load tweets
-      const storedTweets = getTweets();
-      setTweets(storedTweets);
-
-      // Load session
-      const currentSession = await getUserSession();
-      setSession(currentSession);
-
-      // Load config
-      const currentConfig = getPostingConfig();
-      setConfig(currentConfig);
-
-    } catch (error) {
-      console.error('Failed to load dashboard data:', error);
-    } finally {
-      setIsLoading(false);
+    if (refreshTrigger > 0) {
+      // Call refreshAll but don't include it in dependencies to avoid circular updates
+      refreshAll();
     }
-  };
+  }, [refreshTrigger]); // Only depend on refreshTrigger, not refreshAll
 
   const handleTweetAdded = (newTweet: Tweet) => {
-    setTweets(prev => [newTweet, ...prev]);
     setRefreshTrigger(prev => prev + 1);
   };
 
   const handleTweetUpdated = (updatedTweet: Tweet) => {
-    setTweets(prev =>
-      prev.map(tweet =>
-        tweet.id === updatedTweet.id ? updatedTweet : tweet
-      )
-    );
     setRefreshTrigger(prev => prev + 1);
   };
 
   const handleTweetDeleted = (tweetId: string) => {
-    setTweets(prev => prev.filter(tweet => tweet.id !== tweetId));
     setRefreshTrigger(prev => prev + 1);
   };
 
   const handleConfigUpdated = (newConfig: PostingConfig) => {
-    setConfig(newConfig);
+    updateConfig(newConfig);
     setRefreshTrigger(prev => prev + 1);
   };
 
   const handleAuthUpdated = (newSession: UserSession | null) => {
-    setSession(newSession);
+    setRefreshTrigger(prev => prev + 1);
   };
 
   const handleSchedulerTweetPosted = () => {
     // Refresh tweets and stats when scheduler posts a tweet
-    loadData();
     setRefreshTrigger(prev => prev + 1);
   };
 
@@ -105,32 +87,20 @@ const DashboardPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      {/* Header */}
-      <div className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mr-4">
-                <span className="text-2xl">🚀</span>
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">Tweet Cannon Dashboard</h1>
-                <p className="text-gray-600">
-                  Manage your tweets and automation
-                </p>
-              </div>
-            </div>
+    <AuthGuard>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+        <AppHeader
+          title="Tweet Cannon Dashboard"
+          subtitle="Manage your tweets and automation"
+          showNavigation={true}
+          currentPage="dashboard"
+        />
 
-            <div className="flex items-center space-x-4">
+        {/* Additional Controls */}
+        <div className="bg-white border-b border-gray-200">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div className="flex items-center justify-between">
               <StatusMonitor compact />
-              <Link
-                href="/simple-dashboard"
-                className="inline-flex items-center px-3 py-2 text-gray-600 hover:text-gray-900 font-medium rounded-lg hover:bg-gray-100 transition-colors"
-              >
-                <span className="mr-1">📱</span>
-                Simple View
-              </Link>
               <button
                 onClick={() => setShowAdvanced(!showAdvanced)}
                 className="text-sm text-gray-600 hover:text-gray-900 underline"
@@ -140,7 +110,6 @@ const DashboardPage: React.FC = () => {
             </div>
           </div>
         </div>
-      </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Quick Stats */}
@@ -306,7 +275,8 @@ const DashboardPage: React.FC = () => {
           </div>
         )}
       </div>
-    </div>
+      </div>
+    </AuthGuard>
   );
 };
 
