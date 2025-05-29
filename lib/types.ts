@@ -11,6 +11,31 @@ export interface Tweet {
   scheduledFor?: Date;
   postedAt?: Date;
   error?: string;
+  media?: MediaAttachment[];
+}
+
+// Media-related types for image uploads
+export interface MediaAttachment {
+  id: string;
+  mediaId?: string; // Twitter media ID after upload
+  file: File;
+  preview: string; // Data URL for preview
+  uploadStatus: 'pending' | 'uploading' | 'uploaded' | 'failed';
+  uploadProgress?: number;
+  error?: string;
+}
+
+export interface MediaUploadResponse {
+  media_id: number;
+  media_id_string: string;
+  media_key: string;
+  size?: number;
+  expires_after_secs: number;
+  image?: {
+    image_type: string;
+    w: number;
+    h: number;
+  };
 }
 
 export interface PostingConfig {
@@ -50,6 +75,7 @@ export interface ApiResponse<T = any> {
 export interface CreateTweetData {
   content: string;
   scheduledFor?: Date;
+  media?: MediaAttachment[];
 }
 
 export interface UpdateTweetData {
@@ -58,6 +84,7 @@ export interface UpdateTweetData {
   status?: TweetStatus;
   scheduledFor?: Date;
   error?: string;
+  media?: MediaAttachment[];
 }
 
 // Default configurations

@@ -23,6 +23,9 @@ export * from './auth';
 // Twitter API utilities
 export * from './twitter';
 
+// Media utilities
+export * from './media';
+
 // Re-export commonly used functions for convenience
 export {
   // Tweet operations

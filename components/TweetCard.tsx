@@ -65,6 +65,49 @@ const TweetCard: React.FC<TweetCardProps> = ({
       });
       onTweetUpdated?.(updatedTweet);
 
+      let mediaIds: string[] = [];
+
+      // Upload media if present
+      if (tweet.media && tweet.media.length > 0) {
+        console.log('Uploading media for tweet:', tweet.media.length, 'files');
+
+        for (const media of tweet.media) {
+          if (media.uploadStatus !== 'uploaded' && media.file) {
+            try {
+              const formData = new FormData();
+              formData.append('file', media.file);
+              formData.append('cookies', session.cookies);
+
+              const uploadResponse = await fetch('/api/upload-media', {
+                method: 'POST',
+                body: formData,
+              });
+
+              const uploadData = await uploadResponse.json();
+
+              if (uploadResponse.ok && uploadData.mediaId) {
+                mediaIds.push(uploadData.mediaId);
+                console.log('Media uploaded successfully:', uploadData.mediaId);
+              } else {
+                throw new Error(uploadData.error || 'Failed to upload media');
+              }
+            } catch (uploadError) {
+              console.error('Media upload failed:', uploadError);
+              const failedTweet = updateTweet({
+                id: tweet.id,
+                status: 'failed',
+                error: `Media upload failed: ${uploadError instanceof Error ? uploadError.message : 'Unknown error'}`,
+              });
+              onTweetUpdated?.(failedTweet);
+              return;
+            }
+          } else if (media.mediaId) {
+            // Use existing media ID
+            mediaIds.push(media.mediaId);
+          }
+        }
+      }
+
       // Post to Twitter API
       const response = await fetch('/api/tweet', {
         method: 'POST',
@@ -72,6 +115,7 @@ const TweetCard: React.FC<TweetCardProps> = ({
         body: JSON.stringify({
           message: tweet.content,
           cookies: session.cookies,
+          mediaIds: mediaIds.length > 0 ? mediaIds : undefined,
         }),
       });
 
@@ -190,6 +234,50 @@ const TweetCard: React.FC<TweetCardProps> = ({
                   {tweet.content}
                 </p>
 
+                {/* Media Attachments */}
+                {tweet.media && tweet.media.length > 0 && (
+                  <div className="grid grid-cols-2 gap-2 mt-2">
+                    {tweet.media.map((media) => (
+                      <div
+                        key={media.id}
+                        className="relative aspect-square border border-gray-200 rounded-lg overflow-hidden bg-gray-50"
+                      >
+                        <img
+                          src={media.preview}
+                          alt="Tweet attachment"
+                          className="w-full h-full object-cover"
+                        />
+
+                        {/* Upload Status Indicator */}
+                        {media.uploadStatus === 'uploading' && (
+                          <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                            <div className="text-white text-center">
+                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mx-auto mb-1"></div>
+                              <div className="text-xs">Uploading...</div>
+                            </div>
+                          </div>
+                        )}
+
+                        {media.uploadStatus === 'uploaded' && (
+                          <div className="absolute top-1 left-1 bg-green-500 text-white rounded-full p-1">
+                            <svg className="w-2 h-2" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                            </svg>
+                          </div>
+                        )}
+
+                        {media.uploadStatus === 'failed' && (
+                          <div className="absolute inset-0 bg-red-500 bg-opacity-75 flex items-center justify-center">
+                            <div className="text-white text-center">
+                              <div className="text-xs font-medium">Failed</div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+
                 {tweet.scheduledFor && (
                   <p className="text-xs text-blue-600">
                     📅 Scheduled for {formatDate(tweet.scheduledFor)}
@@ -213,8 +301,15 @@ const TweetCard: React.FC<TweetCardProps> = ({
         </CardContent>
 
         <CardFooter className="flex justify-between items-center pt-0">
-          <div className="text-xs text-gray-500">
-            {isEditing ? editContent.length : tweet.content.length}/280 characters
+          <div className="text-xs text-gray-500 space-y-1">
+            <div>
+              {isEditing ? editContent.length : tweet.content.length}/280 characters
+            </div>
+            {tweet.media && tweet.media.length > 0 && (
+              <div>
+                📷 {tweet.media.length} image{tweet.media.length > 1 ? 's' : ''}
+              </div>
+            )}
           </div>
 
           <div className="flex space-x-2">

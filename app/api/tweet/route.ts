@@ -2,16 +2,17 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {
   try {
-    const { message, cookies } = await request.json();
+    const { message, cookies, mediaIds } = await request.json();
 
-    if (!message || !message.trim()) {
+    // Allow empty message if there are media attachments
+    if ((!message || !message.trim()) && (!mediaIds || mediaIds.length === 0)) {
       return NextResponse.json(
-        { error: 'Tweet message is required' },
+        { error: 'Tweet message or media is required' },
         { status: 400 }
       );
     }
 
-    if (message.length > 280) {
+    if (message && message.length > 280) {
       return NextResponse.json(
         { error: 'Tweet message is too long (max 280 characters)' },
         { status: 400 }
@@ -44,8 +45,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log('Posting tweet:', message.substring(0, 50) + '...');
+    console.log('Posting tweet:', message ? message.substring(0, 50) + '...' : '[media only]');
     console.log('Using cookies with ct0:', parsedCookies.ct0?.substring(0, 20) + '...');
+    console.log('Media IDs:', mediaIds);
 
     // Generate a random client transaction ID (like in the curl)
     const generateTransactionId = () => {
@@ -84,11 +86,16 @@ export async function POST(request: NextRequest) {
       'Cookie': cookies
     };
 
+    // Prepare media entities
+    const mediaEntities = mediaIds && mediaIds.length > 0
+      ? mediaIds.map((mediaId: string) => ({ media_id: mediaId, tagged_users: [] }))
+      : [];
+
     // Prepare tweet data
     const tweetData = {
-      text: message,
+      text: message || '',
       media: {
-        media_entities: [],
+        media_entities: mediaEntities,
         possibly_sensitive: false
       }
     };
@@ -101,10 +108,10 @@ export async function POST(request: NextRequest) {
       headers,
       body: JSON.stringify({
         variables: {
-          tweet_text: message,
+          tweet_text: message || '',
           dark_request: false,
           media: {
-            media_entities: [],
+            media_entities: mediaEntities,
             possibly_sensitive: false
           },
           semantic_annotation_ids: [],
@@ -203,7 +210,8 @@ export async function POST(request: NextRequest) {
       success: true,
       tweet: {
         id: result.data?.create_tweet?.tweet_results?.result?.rest_id,
-        text: message
+        text: message || '',
+        mediaCount: mediaEntities.length
       }
     });
 

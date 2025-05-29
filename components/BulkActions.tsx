@@ -30,7 +30,7 @@ const BulkActions: React.FC<BulkActionsProps> = ({
   }
 
   const selectedTweetObjects = tweets.filter(tweet => selectedTweets.includes(tweet.id));
-  const canPost = selectedTweetObjects.some(tweet => 
+  const canPost = selectedTweetObjects.some(tweet =>
     tweet.status === 'queued' || tweet.status === 'failed'
   );
 
@@ -74,14 +74,14 @@ const BulkActions: React.FC<BulkActionsProps> = ({
       // Get session for authentication
       const { getUserSession } = await import('@/lib/storage');
       const session = await getUserSession();
-      
+
       if (!session || !session.isValid || !session.cookies) {
         alert('❌ No authentication cookies found. Please set up authentication first.');
         return;
       }
 
       // Post each selected tweet that can be posted
-      const postableTweets = selectedTweetObjects.filter(tweet => 
+      const postableTweets = selectedTweetObjects.filter(tweet =>
         tweet.status === 'queued' || tweet.status === 'failed'
       );
 
@@ -90,6 +90,44 @@ const BulkActions: React.FC<BulkActionsProps> = ({
           // Update status to posting
           await handleBulkStatusUpdate('posting');
 
+          let mediaIds: string[] = [];
+
+          // Upload media if present
+          if (tweet.media && tweet.media.length > 0) {
+            console.log('Uploading media for tweet:', tweet.media.length, 'files');
+
+            for (const media of tweet.media) {
+              if (media.uploadStatus !== 'uploaded' && media.file) {
+                try {
+                  const formData = new FormData();
+                  formData.append('file', media.file);
+                  formData.append('cookies', session.cookies);
+
+                  const uploadResponse = await fetch('/api/upload-media', {
+                    method: 'POST',
+                    body: formData,
+                  });
+
+                  const uploadData = await uploadResponse.json();
+
+                  if (uploadResponse.ok && uploadData.mediaId) {
+                    mediaIds.push(uploadData.mediaId);
+                    console.log('Media uploaded successfully:', uploadData.mediaId);
+                  } else {
+                    throw new Error(uploadData.error || 'Failed to upload media');
+                  }
+                } catch (uploadError) {
+                  console.error('Media upload failed:', uploadError);
+                  await handleBulkStatusUpdate('failed');
+                  continue; // Skip to next tweet
+                }
+              } else if (media.mediaId) {
+                // Use existing media ID
+                mediaIds.push(media.mediaId);
+              }
+            }
+          }
+
           // Post to Twitter API
           const response = await fetch('/api/tweet', {
             method: 'POST',
@@ -97,6 +135,7 @@ const BulkActions: React.FC<BulkActionsProps> = ({
             body: JSON.stringify({
               message: tweet.content,
               cookies: session.cookies,
+              mediaIds: mediaIds.length > 0 ? mediaIds : undefined,
             }),
           });
 
@@ -142,7 +181,7 @@ const BulkActions: React.FC<BulkActionsProps> = ({
                 Clear
               </Button>
             </div>
-            
+
             <div className="flex items-center space-x-2">
               {canPost && (
                 <Button
@@ -154,7 +193,7 @@ const BulkActions: React.FC<BulkActionsProps> = ({
                   🚀 Post All
                 </Button>
               )}
-              
+
               <Button
                 size="sm"
                 variant="secondary"
@@ -163,7 +202,7 @@ const BulkActions: React.FC<BulkActionsProps> = ({
               >
                 📝 Mark Queued
               </Button>
-              
+
               <Button
                 size="sm"
                 variant="danger"
@@ -198,7 +237,7 @@ const BulkActions: React.FC<BulkActionsProps> = ({
             </ul>
           </div>
         </ModalContent>
-        
+
         <ModalFooter>
           <Button
             variant="secondary"

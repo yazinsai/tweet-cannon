@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { TweetInput } from '@/components/TweetInput';
 import { TweetQueue } from '@/components/TweetQueue';
 import { QueueStats } from '@/components/QueueStats';
@@ -123,6 +124,13 @@ const DashboardPage: React.FC = () => {
 
             <div className="flex items-center space-x-4">
               <StatusMonitor compact />
+              <Link
+                href="/simple-dashboard"
+                className="inline-flex items-center px-3 py-2 text-gray-600 hover:text-gray-900 font-medium rounded-lg hover:bg-gray-100 transition-colors"
+              >
+                <span className="mr-1">📱</span>
+                Simple View
+              </Link>
               <button
                 onClick={() => setShowAdvanced(!showAdvanced)}
                 className="text-sm text-gray-600 hover:text-gray-900 underline"

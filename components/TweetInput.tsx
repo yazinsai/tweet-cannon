@@ -4,8 +4,9 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Textarea } from '@/components/ui/Input';
 import { Card, CardContent, CardFooter } from '@/components/ui/Card';
+import { ImageUpload } from '@/components/ui/ImageUpload';
 import { addTweet } from '@/lib/storage';
-import { CreateTweetData } from '@/lib/types';
+import { CreateTweetData, MediaAttachment } from '@/lib/types';
 import { useNotifications } from '@/contexts/NotificationContext';
 import { addTweetAddedActivity } from '@/components/ActivityFeed';
 
@@ -17,6 +18,7 @@ interface TweetInputProps {
 const TweetInput: React.FC<TweetInputProps> = ({ onTweetAdded, className }) => {
   const [content, setContent] = useState('');
   const [scheduledFor, setScheduledFor] = useState('');
+  const [images, setImages] = useState<MediaAttachment[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -31,13 +33,17 @@ const TweetInput: React.FC<TweetInputProps> = ({ onTweetAdded, className }) => {
       const tweetData: CreateTweetData = {
         content: content.trim(),
         scheduledFor: scheduledFor ? new Date(scheduledFor) : undefined,
+        media: images.length > 0 ? images : undefined,
       };
 
       const newTweet = addTweet(tweetData);
 
       // Show success notification and add activity
+      const hasImages = images.length > 0;
       notifications.showSuccess(
-        scheduledFor ? 'Tweet scheduled successfully!' : 'Tweet added to queue!',
+        scheduledFor
+          ? `Tweet with ${hasImages ? `${images.length} image(s) ` : ''}scheduled successfully!`
+          : `Tweet with ${hasImages ? `${images.length} image(s) ` : ''}added to queue!`,
         'Tweet Added'
       );
       addTweetAddedActivity(content.trim());
@@ -45,6 +51,7 @@ const TweetInput: React.FC<TweetInputProps> = ({ onTweetAdded, className }) => {
       // Reset form
       setContent('');
       setScheduledFor('');
+      setImages([]);
 
       // Notify parent component
       onTweetAdded?.(newTweet);
@@ -57,7 +64,7 @@ const TweetInput: React.FC<TweetInputProps> = ({ onTweetAdded, className }) => {
   };
 
   const isOverLimit = content.length > 280;
-  const isEmpty = content.trim().length === 0;
+  const isEmpty = content.trim().length === 0 && images.length === 0;
 
   return (
     <Card className={className}>
@@ -77,6 +84,12 @@ const TweetInput: React.FC<TweetInputProps> = ({ onTweetAdded, className }) => {
             disabled={isLoading}
           />
 
+          <ImageUpload
+            images={images}
+            onImagesChange={setImages}
+            disabled={isLoading}
+          />
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Schedule for later (optional)
@@ -93,9 +106,12 @@ const TweetInput: React.FC<TweetInputProps> = ({ onTweetAdded, className }) => {
         </CardContent>
 
         <CardFooter className="flex justify-between items-center">
-          <div className="text-sm text-gray-500">
+          <div className="text-sm text-gray-500 space-y-1">
             {scheduledFor && (
-              <span>📅 Scheduled for {new Date(scheduledFor).toLocaleString()}</span>
+              <div>📅 Scheduled for {new Date(scheduledFor).toLocaleString()}</div>
+            )}
+            {images.length > 0 && (
+              <div>📷 {images.length} image{images.length > 1 ? 's' : ''} attached</div>
             )}
           </div>
 

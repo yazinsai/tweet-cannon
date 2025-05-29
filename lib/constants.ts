@@ -18,6 +18,10 @@ export const LIMITS = {
   MAX_INTERVAL_HOURS: 168, // 1 week
   MIN_RANDOM_WINDOW: 5, // 5 minutes
   MAX_RANDOM_WINDOW: 120, // 2 hours
+  // Media limits
+  MAX_MEDIA_SIZE: 5 * 1024 * 1024, // 5MB
+  MAX_MEDIA_COUNT: 4,
+  SUPPORTED_MEDIA_TYPES: ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'],
 } as const;
 
 // Default values

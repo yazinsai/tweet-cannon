@@ -1,9 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { ImageUpload } from '@/components/ui/ImageUpload';
+import { MediaAttachment } from '@/lib/types';
 
 export default function TweetPage() {
   const [message, setMessage] = useState('');
+  const [images, setImages] = useState<MediaAttachment[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [cookieString, setCookieString] = useState('');
   const [authToken, setAuthToken] = useState('');
@@ -93,12 +96,51 @@ export default function TweetPage() {
         return;
       }
 
+      let mediaIds: string[] = [];
+
+      // Upload media if present
+      if (images.length > 0) {
+        console.log('Uploading media for tweet:', images.length, 'files');
+
+        for (const media of images) {
+          if (media.uploadStatus !== 'uploaded' && media.file) {
+            try {
+              const formData = new FormData();
+              formData.append('file', media.file);
+              formData.append('cookies', session.cookies);
+
+              const uploadResponse = await fetch('/api/upload-media', {
+                method: 'POST',
+                body: formData,
+              });
+
+              const uploadData = await uploadResponse.json();
+
+              if (uploadResponse.ok && uploadData.mediaId) {
+                mediaIds.push(uploadData.mediaId);
+                console.log('Media uploaded successfully:', uploadData.mediaId);
+              } else {
+                throw new Error(uploadData.error || 'Failed to upload media');
+              }
+            } catch (uploadError) {
+              console.error('Media upload failed:', uploadError);
+              alert(`❌ Media upload failed: ${uploadError instanceof Error ? uploadError.message : 'Unknown error'}`);
+              return;
+            }
+          } else if (media.mediaId) {
+            // Use existing media ID
+            mediaIds.push(media.mediaId);
+          }
+        }
+      }
+
       const response = await fetch('/api/tweet', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           message,
-          cookies: session.cookies
+          cookies: session.cookies,
+          mediaIds: mediaIds.length > 0 ? mediaIds : undefined,
         }),
       });
 
@@ -106,6 +148,7 @@ export default function TweetPage() {
 
       if (response.ok) {
         setMessage('');
+        setImages([]);
         setShowSuccess(true);
         setTimeout(() => setShowSuccess(false), 5000);
       } else {
@@ -321,7 +364,6 @@ export default function TweetPage() {
                   className="w-full px-6 py-4 border-2 border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-lg resize-none"
                   rows={6}
                   maxLength={280}
-                  required
                 />
                 <div className="absolute bottom-4 right-4 flex items-center space-x-2">
                   <div className={`text-sm font-medium ${
@@ -338,11 +380,17 @@ export default function TweetPage() {
               </div>
             </div>
 
+            <ImageUpload
+              images={images}
+              onImagesChange={setImages}
+              disabled={isLoading}
+            />
+
             {/* Action Buttons */}
             <div className="flex flex-col sm:flex-row gap-4">
               <button
                 type="submit"
-                disabled={isLoading || !message.trim()}
+                disabled={isLoading || (!message.trim() && images.length === 0)}
                 className="flex-1 bg-blue-600 text-white py-4 px-6 rounded-xl hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed font-semibold text-lg transition-colors"
               >
                 {isLoading ? (
@@ -354,6 +402,9 @@ export default function TweetPage() {
                   <span className="flex items-center justify-center">
                     <span className="mr-2">🚀</span>
                     Post Now
+                    {images.length > 0 && (
+                      <span className="ml-2">📷 {images.length}</span>
+                    )}
                   </span>
                 )}
               </button>
