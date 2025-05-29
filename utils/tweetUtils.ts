@@ -20,9 +20,9 @@ export function formatTweetContent(content: string, maxLength: number = 100): st
 export function getTweetStatusInfo(tweet: Tweet) {
   const statusConfig = {
     queued: { label: 'Queued', color: 'blue', icon: '⏳' },
+    posting: { label: 'Posting...', color: 'yellow', icon: '🔄' },
     posted: { label: 'Posted', color: 'green', icon: '✅' },
     failed: { label: 'Failed', color: 'red', icon: '❌' },
-    'in-progress': { label: 'Posting...', color: 'yellow', icon: '🔄' },
   };
 
   return statusConfig[tweet.status] || statusConfig.queued;
@@ -39,7 +39,7 @@ export function canEditTweet(tweet: Tweet): boolean {
  * Check if tweet can be deleted
  */
 export function canDeleteTweet(tweet: Tweet): boolean {
-  return tweet.status !== 'in-progress';
+  return tweet.status !== 'posting';
 }
 
 /**
@@ -58,7 +58,7 @@ export function getTweetSchedulingInfo(tweet: Tweet) {
     isScheduled: true,
     isOverdue,
     scheduledDate,
-    displayText: isOverdue 
+    displayText: isOverdue
       ? `Overdue (${scheduledDate.toLocaleString()})`
       : `Scheduled for ${scheduledDate.toLocaleString()}`,
   };
@@ -122,12 +122,12 @@ export function sortTweetsByPriority(tweets: Tweet[]): Tweet[] {
     // Scheduled tweets first
     if (a.scheduledFor && !b.scheduledFor) return -1;
     if (!a.scheduledFor && b.scheduledFor) return 1;
-    
+
     // If both scheduled, sort by scheduled time
     if (a.scheduledFor && b.scheduledFor) {
       return new Date(a.scheduledFor).getTime() - new Date(b.scheduledFor).getTime();
     }
-    
+
     // Otherwise sort by creation date (newest first)
     return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
   });
@@ -146,7 +146,7 @@ export function filterTweetsByStatus(tweets: Tweet[], status: Tweet['status']): 
 export function getNextScheduledTweet(tweets: Tweet[]): Tweet | null {
   const scheduledTweets = tweets
     .filter(tweet => tweet.status === 'queued' && tweet.scheduledFor)
-    .sort((a, b) => 
+    .sort((a, b) =>
       new Date(a.scheduledFor!).getTime() - new Date(b.scheduledFor!).getTime()
     );
 

@@ -9,7 +9,7 @@ interface UseTweetsReturn {
   isLoading: boolean;
   error: string | null;
   addNewTweet: (data: CreateTweetData) => Promise<Tweet>;
-  updateExistingTweet: (id: string, data: UpdateTweetData) => Promise<Tweet>;
+  updateExistingTweet: (id: string, data: Partial<UpdateTweetData>) => Promise<Tweet>;
   removeExistingTweet: (id: string) => Promise<void>;
   refreshTweets: () => Promise<void>;
   queuedTweets: Tweet[];
@@ -49,10 +49,10 @@ export function useTweets(): UseTweetsReturn {
     }
   }, []);
 
-  const updateExistingTweet = useCallback(async (id: string, data: UpdateTweetData): Promise<Tweet> => {
+  const updateExistingTweet = useCallback(async (id: string, data: Partial<UpdateTweetData>): Promise<Tweet> => {
     try {
       setError(null);
-      const updatedTweet = updateTweet(id, data);
+      const updatedTweet = updateTweet({ id, ...data });
       setTweets(prev =>
         prev.map(tweet =>
           tweet.id === id ? updatedTweet : tweet
