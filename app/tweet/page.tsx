@@ -108,7 +108,7 @@ export default function TweetPage() {
           {/* Setup Card */}
           <div className="bg-white rounded-2xl shadow-lg p-8">
             <div className="mb-6">
-              <div className="flex items-center justify-center w-12 h-12 bg-blue-100 rounded-xl mx-auto mb-4">
+              <div className="flex items-center justify-center w-12 h-12 bg-slate-100 rounded-xl mx-auto mb-4">
                 <span className="text-xl">🔐</span>
               </div>
               <h2 className="text-xl font-semibold text-center text-gray-900 mb-2">
@@ -120,8 +120,8 @@ export default function TweetPage() {
             </div>
 
             {/* Simplified Instructions */}
-            <div className="bg-blue-50 border border-blue-200 rounded-xl p-6 mb-6">
-              <h3 className="font-semibold text-blue-900 mb-4 flex items-center">
+            <div className="bg-slate-50 border border-slate-200 rounded-xl p-6 mb-6">
+              <h3 className="font-semibold text-slate-900 mb-4 flex items-center">
                 <span className="mr-2">📋</span>
                 Follow these simple steps:
               </h3>
@@ -179,7 +179,7 @@ export default function TweetPage() {
                   value={authToken}
                   onChange={(e) => setAuthToken(e.target.value)}
                   placeholder="Paste your auth_token value here..."
-                  className="w-full h-20 px-4 py-3 border border-gray-300 rounded-xl text-sm font-mono focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full h-20 px-4 py-3 border border-gray-300 rounded-xl text-sm font-mono focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
                 />
               </div>
 
@@ -236,54 +236,59 @@ export default function TweetPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-2xl mx-auto">
         <AppHeader
-          subtitle="What's on your mind today?"
+          subtitle="Quick setup for Twitter posting"
           showNavigation={true}
           currentPage="tweet"
           className="mb-8 rounded-2xl"
         />
 
-        <TweetComposer
-          onSuccess={handleTweetSuccess}
-          onError={handleTweetError}
-          submitButtonText="🚀 Post Now"
-          className="mb-8"
-        />
+        {/* Success State */}
+        <div className="bg-white rounded-2xl shadow-lg p-8 mb-8">
+          <div className="text-center">
+            <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <span className="text-3xl">✅</span>
+            </div>
+            <h2 className="text-2xl font-semibold text-gray-900 mb-3">
+              You're Connected!
+            </h2>
+            <p className="text-gray-600 mb-8 max-w-md mx-auto">
+              Your Twitter account is successfully connected. You can now schedule tweets, manage your queue, and set up automated posting.
+            </p>
 
-        {/* Navigation Actions */}
-        <div className="bg-white rounded-2xl shadow-lg p-6 mb-8">
-          <div className="flex flex-col sm:flex-row gap-4">
-            <button
-              type="button"
-              onClick={() => window.location.href = '/simple-dashboard'}
-              className="flex-1 bg-blue-600 text-white py-4 px-6 rounded-xl hover:bg-blue-700 font-semibold text-lg transition-colors"
-            >
-              <span className="flex items-center justify-center">
-                <span className="mr-2">📊</span>
-                Simple Dashboard
-              </span>
-            </button>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <button
+                type="button"
+                onClick={() => window.location.href = '/simple-dashboard'}
+                className="bg-slate-800 text-white py-4 px-8 rounded-xl hover:bg-slate-900 font-semibold text-lg transition-colors"
+              >
+                <span className="flex items-center justify-center">
+                  <span className="mr-2">📊</span>
+                  Go to Dashboard
+                </span>
+              </button>
 
-            <button
-              type="button"
-              onClick={() => window.location.href = '/dashboard'}
-              className="flex-1 bg-white text-gray-700 py-4 px-6 rounded-xl hover:bg-gray-50 border-2 border-gray-200 font-semibold text-lg transition-colors"
-            >
-              <span className="flex items-center justify-center">
-                <span className="mr-2">⚙️</span>
-                Advanced Dashboard
-              </span>
-            </button>
+              <button
+                type="button"
+                onClick={() => window.location.href = '/dashboard'}
+                className="bg-white text-gray-700 py-4 px-8 rounded-xl hover:bg-gray-50 border-2 border-gray-200 font-semibold text-lg transition-colors"
+              >
+                <span className="flex items-center justify-center">
+                  <span className="mr-2">⚙️</span>
+                  Advanced Settings
+                </span>
+              </button>
+            </div>
           </div>
 
-          {/* Quick Actions */}
-          <div className="mt-6 pt-6 border-t border-gray-200">
+          {/* Connection Status */}
+          <div className="mt-8 pt-6 border-t border-gray-200">
             <div className="flex items-center justify-between">
               <div className="flex items-center text-sm text-gray-600">
                 <span className="mr-2">🔒</span>
-                <span>Connected to Twitter</span>
+                <span>Securely connected to Twitter</span>
               </div>
               <button
                 onClick={resetSetup}
@@ -295,28 +300,28 @@ export default function TweetPage() {
           </div>
         </div>
 
-        {/* Quick Tips */}
+        {/* Next Steps */}
         <div className="mt-8 bg-white rounded-2xl shadow-lg p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-            <span className="mr-2">💡</span>
-            Quick Tips
+            <span className="mr-2">🎯</span>
+            Next Steps
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
             <div className="flex items-start">
+              <span className="mr-2">📊</span>
+              <span>Go to Dashboard to schedule your tweets</span>
+            </div>
+            <div className="flex items-start">
               <span className="mr-2">⏰</span>
-              <span>Use the Dashboard to manage your tweet queue</span>
+              <span>Set up automated posting schedules</span>
             </div>
             <div className="flex items-start">
               <span className="mr-2">📝</span>
-              <span>Build a queue of tweets to post automatically</span>
+              <span>Build a queue of content to post over time</span>
             </div>
             <div className="flex items-start">
-              <span className="mr-2">🎯</span>
-              <span>Keep tweets under 280 characters for best engagement</span>
-            </div>
-            <div className="flex items-start">
-              <span className="mr-2">🔄</span>
-              <span>Set up automated posting schedules</span>
+              <span className="mr-2">🔒</span>
+              <span>All data stays secure on your device</span>
             </div>
           </div>
         </div>

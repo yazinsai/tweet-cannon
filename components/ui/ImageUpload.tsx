@@ -113,7 +113,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
           className={cn(
             'relative border-2 border-dashed rounded-lg p-6 text-center transition-colors',
             dragActive
-              ? 'border-blue-500 bg-blue-50'
+              ? 'border-slate-500 bg-slate-50'
               : 'border-gray-300 hover:border-gray-400',
             disabled && 'opacity-50 cursor-not-allowed'
           )}

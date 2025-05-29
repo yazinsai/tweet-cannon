@@ -18,7 +18,7 @@ const PostingSettings: React.FC<PostingSettingsProps> = ({
   className,
 }) => {
   const [config, setConfig] = useState<PostingConfig>({
-    enabled: false,
+    enabled: true,
     cadence: 'daily',
     interval: 24,
     randomWindow: 30,
@@ -70,7 +70,7 @@ const PostingSettings: React.FC<PostingSettingsProps> = ({
     const now = new Date();
     const intervalMs = config.interval * 60 * 60 * 1000; // Convert hours to milliseconds
     const randomMs = Math.random() * config.randomWindow * 60 * 1000; // Convert minutes to milliseconds
-    
+
     return new Date(now.getTime() + intervalMs + randomMs);
   };
 
@@ -108,7 +108,7 @@ const PostingSettings: React.FC<PostingSettingsProps> = ({
           </Badge>
         </CardTitle>
       </CardHeader>
-      
+
       <CardContent className="space-y-6">
         {/* Enable/Disable Toggle */}
         <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">

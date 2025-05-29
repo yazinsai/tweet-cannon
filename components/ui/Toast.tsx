@@ -58,11 +58,11 @@ const Toast: React.FC<ToastComponentProps> = ({
 
   const typeStyles = {
     success: {
-      bg: 'bg-green-50 border-green-200',
+      bg: 'bg-emerald-50 border-emerald-200',
       icon: '✅',
-      iconColor: 'text-green-600',
-      titleColor: 'text-green-800',
-      messageColor: 'text-green-700',
+      iconColor: 'text-emerald-600',
+      titleColor: 'text-emerald-800',
+      messageColor: 'text-emerald-700',
     },
     error: {
       bg: 'bg-red-50 border-red-200',
@@ -72,18 +72,18 @@ const Toast: React.FC<ToastComponentProps> = ({
       messageColor: 'text-red-700',
     },
     warning: {
-      bg: 'bg-yellow-50 border-yellow-200',
+      bg: 'bg-amber-50 border-amber-200',
       icon: '⚠️',
-      iconColor: 'text-yellow-600',
-      titleColor: 'text-yellow-800',
-      messageColor: 'text-yellow-700',
+      iconColor: 'text-amber-600',
+      titleColor: 'text-amber-800',
+      messageColor: 'text-amber-700',
     },
     info: {
-      bg: 'bg-blue-50 border-blue-200',
+      bg: 'bg-slate-50 border-slate-200',
       icon: 'ℹ️',
-      iconColor: 'text-blue-600',
-      titleColor: 'text-blue-800',
-      messageColor: 'text-blue-700',
+      iconColor: 'text-slate-600',
+      titleColor: 'text-slate-800',
+      messageColor: 'text-slate-700',
     },
   };
 
@@ -104,7 +104,7 @@ const Toast: React.FC<ToastComponentProps> = ({
         <div className={cn('flex-shrink-0 text-lg', styles.iconColor)}>
           {styles.icon}
         </div>
-        
+
         <div className="ml-3 w-0 flex-1">
           {title && (
             <p className={cn('text-sm font-medium', styles.titleColor)}>
@@ -114,7 +114,7 @@ const Toast: React.FC<ToastComponentProps> = ({
           <p className={cn('text-sm', styles.messageColor, title && 'mt-1')}>
             {message}
           </p>
-          
+
           {action && (
             <div className="mt-3">
               <button
@@ -129,7 +129,7 @@ const Toast: React.FC<ToastComponentProps> = ({
             </div>
           )}
         </div>
-        
+
         <div className="ml-4 flex-shrink-0 flex">
           <button
             onClick={handleClose}

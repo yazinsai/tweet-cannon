@@ -88,10 +88,10 @@ const DashboardPage: React.FC = () => {
 
   return (
     <AuthGuard>
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100">
         <AppHeader
-          title="Tweet Cannon Dashboard"
-          subtitle="Manage your tweets and automation"
+          title="Advanced Dashboard"
+          subtitle="Detailed automation controls"
           showNavigation={true}
           currentPage="dashboard"
         />
@@ -101,12 +101,6 @@ const DashboardPage: React.FC = () => {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
             <div className="flex items-center justify-between">
               <StatusMonitor compact />
-              <button
-                onClick={() => setShowAdvanced(!showAdvanced)}
-                className="text-sm text-gray-600 hover:text-gray-900 underline"
-              >
-                {showAdvanced ? 'Hide' : 'Show'} Advanced
-              </button>
             </div>
           </div>
         </div>
@@ -127,7 +121,7 @@ const DashboardPage: React.FC = () => {
                   onClick={() => setActiveTab(tab.id)}
                   className={`flex-1 py-3 px-4 rounded-xl font-medium text-sm flex items-center justify-center space-x-2 transition-colors ${
                     activeTab === tab.id
-                      ? 'bg-blue-600 text-white shadow-md'
+                      ? 'bg-slate-800 text-white shadow-md'
                       : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                   }`}
                 >

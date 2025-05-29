@@ -6,36 +6,21 @@ import { MediaAttachment } from '@/lib/types';
 import { ImageUpload } from '@/components/ui/ImageUpload';
 import { AuthGuard } from '@/components/shared/AuthGuard';
 import { AppHeader } from '@/components/shared/AppHeader';
+import { TweetInput } from '@/components/TweetInput';
 import { useAppData } from '@/hooks/useAppData';
 
 const SimpleDashboard: React.FC = () => {
-  const [newTweet, setNewTweet] = useState('');
-  const [images, setImages] = useState<MediaAttachment[]>([]);
-
   const {
     isLoading,
     queuedTweets,
     postedTweets,
     schedulerEnabled,
-    addNewTweet,
     removeExistingTweet,
+    refreshAll,
   } = useAppData();
 
-  const handleAddTweet = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newTweet.trim() && images.length === 0) return;
-
-    try {
-      await addNewTweet({
-        content: newTweet.trim(),
-        media: images.length > 0 ? images : undefined,
-      });
-
-      setNewTweet('');
-      setImages([]);
-    } catch (error) {
-      console.error('Failed to add tweet:', error);
-    }
+  const handleTweetAdded = () => {
+    refreshAll();
   };
 
   const handleDeleteTweet = async (tweetId: string) => {
@@ -48,15 +33,15 @@ const SimpleDashboard: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-slate-600"></div>
       </div>
     );
   }
 
   return (
     <AuthGuard>
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100">
         <AppHeader
           subtitle="Dashboard"
           showNavigation={true}
@@ -83,44 +68,7 @@ const SimpleDashboard: React.FC = () => {
 
           {/* Add Tweet Section */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-2xl shadow-lg p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                <span className="mr-2">📝</span>
-                Add to Queue
-              </h2>
-
-              <form onSubmit={handleAddTweet} className="space-y-4">
-                <div>
-                  <textarea
-                    value={newTweet}
-                    onChange={(e) => setNewTweet(e.target.value)}
-                    placeholder="What's on your mind?"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
-                    rows={4}
-                    maxLength={280}
-                  />
-                  <div className="text-right text-sm text-gray-500 mt-1">
-                    {newTweet.length}/280
-                  </div>
-                </div>
-
-                <ImageUpload
-                  images={images}
-                  onImagesChange={setImages}
-                />
-
-                <button
-                  type="submit"
-                  disabled={!newTweet.trim() && images.length === 0}
-                  className="w-full bg-blue-600 text-white py-3 px-4 rounded-xl hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium transition-colors"
-                >
-                  Add to Queue
-                  {images.length > 0 && (
-                    <span className="ml-2">📷 {images.length}</span>
-                  )}
-                </button>
-              </form>
-            </div>
+            <TweetInput onTweetAdded={handleTweetAdded} />
 
             {/* Quick Stats */}
             <div className="mt-6 bg-white rounded-2xl shadow-lg p-6">
@@ -130,12 +78,12 @@ const SimpleDashboard: React.FC = () => {
               </h3>
 
               <div className="grid grid-cols-2 gap-4">
-                <div className="text-center p-3 bg-blue-50 rounded-xl">
-                  <div className="text-2xl font-bold text-blue-600">{queuedTweets.length}</div>
+                <div className="text-center p-3 bg-slate-50 rounded-xl">
+                  <div className="text-2xl font-bold text-slate-700">{queuedTweets.length}</div>
                   <div className="text-sm text-gray-600">In Queue</div>
                 </div>
-                <div className="text-center p-3 bg-green-50 rounded-xl">
-                  <div className="text-2xl font-bold text-green-600">{postedTweets.length}</div>
+                <div className="text-center p-3 bg-emerald-50 rounded-xl">
+                  <div className="text-2xl font-bold text-emerald-600">{postedTweets.length}</div>
                   <div className="text-sm text-gray-600">Posted</div>
                 </div>
               </div>
@@ -227,8 +175,8 @@ const SimpleDashboard: React.FC = () => {
                                 📷 {tweet.media.length} image{tweet.media.length > 1 ? 's' : ''}
                               </span>
                             )}
-                            <span className="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
-                              Queued
+                            <span className="inline-flex items-center px-2 py-1 bg-slate-100 text-slate-700 rounded-full text-xs font-medium">
+                              Scheduled
                             </span>
                           </div>
                         </div>

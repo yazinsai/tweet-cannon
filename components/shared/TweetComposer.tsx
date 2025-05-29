@@ -30,7 +30,7 @@ export function TweetComposer({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!message.trim() && images.length === 0) {
       const error = 'Please enter a message or add an image';
       onError?.(error);
@@ -39,17 +39,17 @@ export function TweetComposer({
 
     try {
       await postTweet(message, images);
-      
+
       // Reset form
       setMessage('');
       setImages([]);
-      
+
       // Show success
       if (showSuccessMessage) {
         setShowSuccess(true);
         setTimeout(() => setShowSuccess(false), 5000);
       }
-      
+
       onSuccess?.(message);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to post tweet';
@@ -77,7 +77,7 @@ export function TweetComposer({
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             placeholder={placeholder}
-            className="w-full p-4 border border-gray-200 rounded-xl resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full p-4 border border-gray-200 rounded-xl resize-none focus:ring-2 focus:ring-slate-500 focus:border-transparent"
             rows={4}
             disabled={isPosting}
           />

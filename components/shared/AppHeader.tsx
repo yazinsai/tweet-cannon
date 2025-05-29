@@ -11,7 +11,7 @@ interface AppHeaderProps {
   className?: string;
 }
 
-export function AppHeader({ 
+export function AppHeader({
   title = 'Tweet Cannon',
   subtitle,
   showNavigation = false,
@@ -19,9 +19,8 @@ export function AppHeader({
   className = ''
 }: AppHeaderProps) {
   const navigationLinks = [
-    { href: '/tweet', label: 'Compose', icon: '✍️', id: 'tweet' as const },
-    { href: '/simple-dashboard', label: 'Simple Dashboard', icon: '📊', id: 'simple-dashboard' as const },
-    { href: '/dashboard', label: 'Advanced Dashboard', icon: '🚀', id: 'dashboard' as const },
+    { href: '/simple-dashboard', label: 'Dashboard', icon: '📊', id: 'simple-dashboard' as const },
+    { href: '/dashboard', label: 'Advanced', icon: '⚙️', id: 'dashboard' as const },
   ];
 
   return (

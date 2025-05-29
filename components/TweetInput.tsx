@@ -17,7 +17,12 @@ interface TweetInputProps {
 
 const TweetInput: React.FC<TweetInputProps> = ({ onTweetAdded, className }) => {
   const [content, setContent] = useState('');
-  const [scheduledFor, setScheduledFor] = useState('');
+  // Default to 1 hour from now for scheduling
+  const [scheduledFor, setScheduledFor] = useState(() => {
+    const now = new Date();
+    now.setHours(now.getHours() + 1);
+    return now.toISOString().slice(0, 16);
+  });
   const [images, setImages] = useState<MediaAttachment[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -48,9 +53,11 @@ const TweetInput: React.FC<TweetInputProps> = ({ onTweetAdded, className }) => {
       );
       addTweetAddedActivity(content.trim());
 
-      // Reset form
+      // Reset form but keep default scheduling time
       setContent('');
-      setScheduledFor('');
+      const now = new Date();
+      now.setHours(now.getHours() + 1);
+      setScheduledFor(now.toISOString().slice(0, 16));
       setImages([]);
 
       // Notify parent component
@@ -69,7 +76,7 @@ const TweetInput: React.FC<TweetInputProps> = ({ onTweetAdded, className }) => {
   return (
     <Card className={className}>
       <form onSubmit={handleSubmit}>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-4 mt-4">
           <Textarea
             label="What's happening?"
             placeholder="Enter your tweet..."
@@ -92,14 +99,14 @@ const TweetInput: React.FC<TweetInputProps> = ({ onTweetAdded, className }) => {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Schedule for later (optional)
+              Schedule for
             </label>
             <input
               type="datetime-local"
               value={scheduledFor}
               onChange={(e) => setScheduledFor(e.target.value)}
               min={new Date().toISOString().slice(0, 16)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
               disabled={isLoading}
             />
           </div>
@@ -120,7 +127,7 @@ const TweetInput: React.FC<TweetInputProps> = ({ onTweetAdded, className }) => {
             disabled={isEmpty || isOverLimit || isLoading}
             loading={isLoading}
           >
-            {scheduledFor ? 'Schedule Tweet' : 'Add to Queue'}
+            Schedule Tweet
           </Button>
         </CardFooter>
       </form>
