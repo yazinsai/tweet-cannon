@@ -217,7 +217,7 @@ const TweetCard: React.FC<TweetCardProps> = ({
 
                 <div>
                   <label className="block text-xs font-medium text-gray-700 mb-1">
-                    Schedule for later (optional)
+                    Custom schedule time (optional)
                   </label>
                   <input
                     type="datetime-local"
@@ -226,6 +226,9 @@ const TweetCard: React.FC<TweetCardProps> = ({
                     min={new Date().toISOString().slice(0, 16)}
                     className="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Leave empty to post at next scheduled window
+                  </p>
                 </div>
               </div>
             ) : (

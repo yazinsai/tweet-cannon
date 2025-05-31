@@ -309,7 +309,7 @@ export default function TweetPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
             <div className="flex items-start">
               <span className="mr-2">📊</span>
-              <span>Go to Dashboard to schedule your tweets</span>
+              <span>Go to Dashboard to manage your tweet queue</span>
             </div>
             <div className="flex items-start">
               <span className="mr-2">⏰</span>

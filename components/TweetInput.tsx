@@ -19,12 +19,6 @@ interface TweetInputProps {
 
 const TweetInput: React.FC<TweetInputProps> = ({ onTweetAdded, className }) => {
   const [content, setContent] = useState('');
-  // Default to 1 hour from now for scheduling
-  const [scheduledFor, setScheduledFor] = useState(() => {
-    const now = new Date();
-    now.setHours(now.getHours() + 1);
-    return now.toISOString().slice(0, 16);
-  });
   const [images, setImages] = useState<MediaAttachment[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -52,7 +46,6 @@ const TweetInput: React.FC<TweetInputProps> = ({ onTweetAdded, className }) => {
     try {
       const tweetData: CreateTweetData = {
         content: content.trim(),
-        scheduledFor: scheduledFor ? new Date(scheduledFor) : undefined,
         media: images.length > 0 ? images : undefined,
       };
 
@@ -61,18 +54,13 @@ const TweetInput: React.FC<TweetInputProps> = ({ onTweetAdded, className }) => {
       // Show success notification and add activity
       const hasImages = images.length > 0;
       notifications.showSuccess(
-        scheduledFor
-          ? `Tweet with ${hasImages ? `${images.length} image(s) ` : ''}scheduled successfully!`
-          : `Tweet with ${hasImages ? `${images.length} image(s) ` : ''}added to queue!`,
+        `Tweet with ${hasImages ? `${images.length} image(s) ` : ''}added to queue!`,
         'Tweet Added'
       );
       addTweetAddedActivity(content.trim());
 
-      // Reset form but keep default scheduling time
+      // Reset form
       setContent('');
-      const now = new Date();
-      now.setHours(now.getHours() + 1);
-      setScheduledFor(now.toISOString().slice(0, 16));
       setImages([]);
 
       // Notify parent component
@@ -115,26 +103,11 @@ const TweetInput: React.FC<TweetInputProps> = ({ onTweetAdded, className }) => {
             compact={true}
           />
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Schedule for
-            </label>
-            <input
-              type="datetime-local"
-              value={scheduledFor}
-              onChange={(e) => setScheduledFor(e.target.value)}
-              min={new Date().toISOString().slice(0, 16)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
-              disabled={isLoading}
-            />
-          </div>
+
         </CardContent>
 
         <CardFooter className="flex justify-between items-center">
           <div className="text-sm text-gray-500 space-y-1">
-            {scheduledFor && (
-              <div>📅 Scheduled for {new Date(scheduledFor).toLocaleString()}</div>
-            )}
             {images.length > 0 && (
               <div>📷 {images.length} image{images.length > 1 ? 's' : ''} attached</div>
             )}
@@ -145,7 +118,7 @@ const TweetInput: React.FC<TweetInputProps> = ({ onTweetAdded, className }) => {
             disabled={isEmpty || isOverLimit || isLoading}
             loading={isLoading}
           >
-            Schedule Tweet
+            Add to Queue
           </Button>
         </CardFooter>
       </form>

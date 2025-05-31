@@ -176,7 +176,7 @@ const SimpleDashboard: React.FC = () => {
                               </span>
                             )}
                             <span className="inline-flex items-center px-2 py-1 bg-slate-100 text-slate-700 rounded-full text-xs font-medium">
-                              Scheduled
+                              Queued
                             </span>
                           </div>
                         </div>
