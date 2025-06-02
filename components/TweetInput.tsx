@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Textarea } from '@/components/ui/Input';
 import { Card, CardContent, CardFooter } from '@/components/ui/Card';
@@ -11,22 +11,68 @@ import { useNotifications } from '@/contexts/NotificationContext';
 import { addTweetAddedActivity } from '@/components/ActivityFeed';
 import { createImageEventHandlers } from '@/lib/imageHandlers';
 import { MEDIA_LIMITS } from '@/lib/media';
-import { getCharacterCountInfo, validateTweetContentWithThreading } from '@/utils/tweetUtils';
+import {
+  getCharacterCountInfo,
+  validateTweetContentWithThreading,
+  saveTweetDraft,
+  loadTweetDraft,
+  clearTweetDraft,
+  shouldRestoreDraft
+} from '@/utils/tweetUtils';
 
 interface TweetInputProps {
   onTweetAdded?: (tweet: any) => void;
   className?: string;
   enableThreading?: boolean;
+  location?: 'simple-dashboard' | 'dashboard' | 'tweet-composer';
 }
 
-const TweetInput: React.FC<TweetInputProps> = ({ onTweetAdded, className, enableThreading = true }) => {
+const TweetInput: React.FC<TweetInputProps> = ({ onTweetAdded, className, enableThreading = true, location = 'dashboard' }) => {
   const [content, setContent] = useState('');
   const [images, setImages] = useState<MediaAttachment[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [dragActive, setDragActive] = useState(false);
+  const [draftRestored, setDraftRestored] = useState(false);
+  const [showDraftIndicator, setShowDraftIndicator] = useState(false);
 
   const notifications = useNotifications();
+
+  // Load draft on component mount
+  useEffect(() => {
+    const draft = loadTweetDraft();
+    if (shouldRestoreDraft(draft) && draft?.location === location) {
+      setContent(draft.content);
+      setImages(draft.images);
+      setDraftRestored(true);
+      // Show draft restored indicator
+      setShowDraftIndicator(true);
+      setTimeout(() => setShowDraftIndicator(false), 3000);
+    }
+  }, [location]);
+
+  // Auto-save draft with debouncing
+  const saveDraft = useCallback(() => {
+    if (content.trim() || images.length > 0) {
+      saveTweetDraft({ content, images }, location);
+    }
+  }, [content, images, location]);
+
+  // Debounced auto-save effect
+  useEffect(() => {
+    if (!draftRestored && (content.trim() || images.length > 0)) {
+      const timeoutId = setTimeout(saveDraft, 1000); // Save after 1 second of inactivity
+      return () => clearTimeout(timeoutId);
+    }
+  }, [content, images, saveDraft, draftRestored]);
+
+  // Clear the draft restored flag after initial load
+  useEffect(() => {
+    if (draftRestored) {
+      const timeoutId = setTimeout(() => setDraftRestored(false), 100);
+      return () => clearTimeout(timeoutId);
+    }
+  }, [draftRestored]);
 
   // Create image event handlers for the textarea
   const imageHandlers = createImageEventHandlers(
@@ -71,7 +117,8 @@ const TweetInput: React.FC<TweetInputProps> = ({ onTweetAdded, className, enable
       notifications.showSuccess(successMessage, 'Tweet Added');
       addTweetAddedActivity(content.trim());
 
-      // Reset form
+      // Clear draft and reset form
+      clearTweetDraft();
       setContent('');
       setImages([]);
 
@@ -92,6 +139,14 @@ const TweetInput: React.FC<TweetInputProps> = ({ onTweetAdded, className, enable
 
   return (
     <Card className={className}>
+      {showDraftIndicator && (
+        <div className="bg-blue-50 border-l-4 border-blue-400 p-3 mb-4">
+          <div className="flex items-center">
+            <span className="text-blue-600 mr-2">💾</span>
+            <span className="text-blue-800 text-sm font-medium">Draft restored</span>
+          </div>
+        </div>
+      )}
       <form onSubmit={handleSubmit}>
         <CardContent className="space-y-4 mt-4">
           <Textarea
@@ -132,6 +187,9 @@ const TweetInput: React.FC<TweetInputProps> = ({ onTweetAdded, className, enable
             )}
             {validation.warnings.length > 0 && (
               <div className="text-amber-600">⚠️ {validation.warnings[0]}</div>
+            )}
+            {(content.trim() || images.length > 0) && !isLoading && (
+              <div className="text-xs text-gray-400">💾 Auto-saving draft...</div>
             )}
           </div>
 

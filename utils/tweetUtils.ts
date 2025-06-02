@@ -4,6 +4,7 @@
 
 import { Tweet, MediaAttachment } from '@/lib/types';
 import { getThreadPreview } from './tweetThreading';
+import { STORAGE_KEYS } from '@/lib/constants';
 
 /**
  * Format tweet content for display
@@ -207,4 +208,106 @@ export function getNextScheduledTweet(tweets: Tweet[]): Tweet | null {
     );
 
   return scheduledTweets[0] || null;
+}
+
+// Draft Management Types
+export interface TweetDraft {
+  content: string;
+  images: MediaAttachment[];
+  lastSaved: Date;
+  location: 'simple-dashboard' | 'dashboard' | 'tweet-composer';
+}
+
+/**
+ * Check if localStorage is available
+ */
+function isStorageAvailable(): boolean {
+  try {
+    return typeof window !== 'undefined' && window.localStorage !== null;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Save tweet draft to localStorage
+ */
+export function saveTweetDraft(draft: Omit<TweetDraft, 'lastSaved'>, location: TweetDraft['location']): void {
+  if (!isStorageAvailable()) {
+    return;
+  }
+
+  try {
+    const draftWithTimestamp: TweetDraft = {
+      ...draft,
+      location,
+      lastSaved: new Date(),
+    };
+
+    localStorage.setItem(STORAGE_KEYS.DRAFTS, JSON.stringify(draftWithTimestamp));
+  } catch (error) {
+    console.warn('Failed to save tweet draft:', error);
+  }
+}
+
+/**
+ * Load tweet draft from localStorage
+ */
+export function loadTweetDraft(): TweetDraft | null {
+  if (!isStorageAvailable()) {
+    return null;
+  }
+
+  try {
+    const stored = localStorage.getItem(STORAGE_KEYS.DRAFTS);
+    if (!stored) {
+      return null;
+    }
+
+    const draft = JSON.parse(stored);
+    return {
+      ...draft,
+      lastSaved: new Date(draft.lastSaved),
+    };
+  } catch (error) {
+    console.warn('Failed to load tweet draft:', error);
+    return null;
+  }
+}
+
+/**
+ * Clear tweet draft from localStorage
+ */
+export function clearTweetDraft(): void {
+  if (!isStorageAvailable()) {
+    return;
+  }
+
+  try {
+    localStorage.removeItem(STORAGE_KEYS.DRAFTS);
+  } catch (error) {
+    console.warn('Failed to clear tweet draft:', error);
+  }
+}
+
+/**
+ * Check if draft should be restored (not empty and recent)
+ */
+export function shouldRestoreDraft(draft: TweetDraft | null): boolean {
+  if (!draft) {
+    return false;
+  }
+
+  // Don't restore if content is empty and no images
+  if (!draft.content.trim() && draft.images.length === 0) {
+    return false;
+  }
+
+  // Don't restore if draft is older than 24 hours
+  const hoursSinceLastSaved = (Date.now() - draft.lastSaved.getTime()) / (1000 * 60 * 60);
+  if (hoursSinceLastSaved > 24) {
+    return false;
+  }
+
+  return true;
 }

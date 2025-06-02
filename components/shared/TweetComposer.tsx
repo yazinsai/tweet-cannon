@@ -1,13 +1,20 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { MediaAttachment } from '@/lib/types';
 import { ImageUpload } from '@/components/ui/ImageUpload';
 import { useTweetPosting } from '@/hooks/useTweetPosting';
 import { createImageEventHandlers } from '@/lib/imageHandlers';
 import { MEDIA_LIMITS } from '@/lib/media';
 import { cn } from '@/lib/utils';
-import { getCharacterCountInfo, validateTweetContentWithThreading } from '@/utils/tweetUtils';
+import {
+  getCharacterCountInfo,
+  validateTweetContentWithThreading,
+  saveTweetDraft,
+  loadTweetDraft,
+  clearTweetDraft,
+  shouldRestoreDraft
+} from '@/utils/tweetUtils';
 
 interface TweetComposerProps {
   onSuccess?: (message: string) => void;
@@ -32,8 +39,42 @@ export function TweetComposer({
   const [images, setImages] = useState<MediaAttachment[]>([]);
   const [showSuccess, setShowSuccess] = useState(false);
   const [dragActive, setDragActive] = useState(false);
+  const [draftRestored, setDraftRestored] = useState(false);
 
   const { isPosting, postTweet } = useTweetPosting();
+
+  // Load draft on component mount
+  useEffect(() => {
+    const draft = loadTweetDraft();
+    if (shouldRestoreDraft(draft) && draft?.location === 'tweet-composer') {
+      setMessage(draft.content);
+      setImages(draft.images);
+      setDraftRestored(true);
+    }
+  }, []);
+
+  // Auto-save draft with debouncing
+  const saveDraft = useCallback(() => {
+    if (message.trim() || images.length > 0) {
+      saveTweetDraft({ content: message, images }, 'tweet-composer');
+    }
+  }, [message, images]);
+
+  // Debounced auto-save effect
+  useEffect(() => {
+    if (!draftRestored && (message.trim() || images.length > 0)) {
+      const timeoutId = setTimeout(saveDraft, 1000); // Save after 1 second of inactivity
+      return () => clearTimeout(timeoutId);
+    }
+  }, [message, images, saveDraft, draftRestored]);
+
+  // Clear the draft restored flag after initial load
+  useEffect(() => {
+    if (draftRestored) {
+      const timeoutId = setTimeout(() => setDraftRestored(false), 100);
+      return () => clearTimeout(timeoutId);
+    }
+  }, [draftRestored]);
 
   // Create image event handlers for the textarea
   const imageHandlers = createImageEventHandlers(
@@ -61,7 +102,8 @@ export function TweetComposer({
     try {
       await postTweet(message, images);
 
-      // Reset form
+      // Clear draft and reset form
+      clearTweetDraft();
       setMessage('');
       setImages([]);
 

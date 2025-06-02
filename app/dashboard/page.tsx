@@ -139,7 +139,7 @@ const DashboardPage: React.FC = () => {
             {/* Tweet Input */}
             <div className="lg:col-span-1">
               <div className="bg-white rounded-2xl shadow-lg p-6">
-                <TweetInput onTweetAdded={handleTweetAdded} />
+                <TweetInput onTweetAdded={handleTweetAdded} location="dashboard" />
               </div>
             </div>
 

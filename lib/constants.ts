@@ -8,6 +8,7 @@ export const STORAGE_KEYS = {
   CONFIG: 'tweet-cannon-config',
   SESSION: 'tweet-cannon-session',
   ENCRYPTION_KEY: 'tweet-cannon-key',
+  DRAFTS: 'tweet-cannon-drafts',
 } as const;
 
 // Application limits
