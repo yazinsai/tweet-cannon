@@ -232,7 +232,7 @@ function isStorageAvailable(): boolean {
 /**
  * Save tweet draft to localStorage
  */
-export function saveTweetDraft(draft: Omit<TweetDraft, 'lastSaved'>, location: TweetDraft['location']): void {
+export function saveTweetDraft(draft: Omit<TweetDraft, 'lastSaved' | 'location'>, location: TweetDraft['location']): void {
   if (!isStorageAvailable()) {
     return;
   }
