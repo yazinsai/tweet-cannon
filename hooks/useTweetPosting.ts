@@ -67,6 +67,7 @@ export function useTweetPosting(): UseTweetPostingReturn {
           message,
           cookies: session.cookies,
           mediaIds: mediaIds.length > 0 ? mediaIds : undefined,
+          enableThreading: true, // Enable threading by default
         }),
       });
 

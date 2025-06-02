@@ -8,6 +8,8 @@ import { AuthGuard } from '@/components/shared/AuthGuard';
 import { AppHeader } from '@/components/shared/AppHeader';
 import { TweetInput } from '@/components/TweetInput';
 import { useAppData } from '@/hooks/useAppData';
+import { getCharacterCountInfo } from '@/utils/tweetUtils';
+import { splitTextIntoThread } from '@/utils/tweetThreading';
 
 const SimpleDashboard: React.FC = () => {
   const {
@@ -116,11 +118,48 @@ const SimpleDashboard: React.FC = () => {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {queuedTweets.map((tweet) => (
-                    <div key={tweet.id} className="border border-gray-200 rounded-xl p-4">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <p className="text-gray-900 mb-2">{tweet.content}</p>
+                  {queuedTweets.map((tweet) => {
+                    const tweetCharInfo = getCharacterCountInfo(tweet.content, true);
+
+                    return (
+                      <div key={tweet.id} className="border border-gray-200 rounded-xl p-4">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            {/* Thread Preview or Regular Content */}
+                            {tweetCharInfo.needsThreading ? (
+                              <div className="space-y-3 mb-3">
+                                {/* Thread Header */}
+                                <div className="flex items-center gap-2 text-xs text-blue-600 font-medium">
+                                  <span>🧵</span>
+                                  <span>Thread ({tweetCharInfo.threadParts} parts)</span>
+                                </div>
+
+                                {/* Thread Parts */}
+                                {(() => {
+                                  const thread = splitTextIntoThread(tweet.content);
+                                  return thread.parts.map((part, index) => (
+                                    <div key={index}>
+                                      <div className="text-sm text-gray-900 whitespace-pre-wrap bg-gray-50 rounded-lg p-3 border-l-4 border-blue-200">
+                                        <div className="flex items-start gap-2">
+                                          <span className="text-xs text-blue-600 font-medium bg-blue-100 rounded-full px-2 py-1 flex-shrink-0">
+                                            {index + 1}
+                                          </span>
+                                          <span className="flex-1">{part}</span>
+                                        </div>
+                                      </div>
+                                      {/* Dotted separator between parts */}
+                                      {index < thread.parts.length - 1 && (
+                                        <div className="flex justify-center py-2">
+                                          <div className="border-t-2 border-dotted border-gray-300 w-16"></div>
+                                        </div>
+                                      )}
+                                    </div>
+                                  ));
+                                })()}
+                              </div>
+                            ) : (
+                              <p className="text-gray-900 mb-2">{tweet.content}</p>
+                            )}
 
                           {/* Media Attachments */}
                           {tweet.media && tweet.media.length > 0 && (
@@ -166,13 +205,18 @@ const SimpleDashboard: React.FC = () => {
                             </div>
                           )}
 
-                          <div className="flex items-center text-sm text-gray-500">
-                            <span className="mr-4">
+                          <div className="flex items-center text-sm text-gray-500 flex-wrap gap-2">
+                            <span>
                               Added {new Date(tweet.createdAt).toLocaleDateString()}
                             </span>
                             {tweet.media && tweet.media.length > 0 && (
-                              <span className="mr-4">
+                              <span>
                                 📷 {tweet.media.length} image{tweet.media.length > 1 ? 's' : ''}
+                              </span>
+                            )}
+                            {tweetCharInfo.needsThreading && (
+                              <span className="text-blue-600">
+                                🧵 Will post as thread
                               </span>
                             )}
                             <span className="inline-flex items-center px-2 py-1 bg-slate-100 text-slate-700 rounded-full text-xs font-medium">
@@ -189,7 +233,8 @@ const SimpleDashboard: React.FC = () => {
                         </button>
                       </div>
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>

@@ -2,15 +2,16 @@
  * Data validation utilities for Tweet Cannon
  */
 
-import { 
-  Tweet, 
-  PostingConfig, 
-  UserSession, 
+import {
+  Tweet,
+  PostingConfig,
+  UserSession,
   ValidationResult,
   CreateTweetData,
-  UpdateTweetData 
+  UpdateTweetData
 } from './types';
 import { LIMITS, ERROR_MESSAGES } from './constants';
+import { validateTweetContentWithThreading } from '../utils/tweetUtils';
 
 /**
  * Validate tweet content
@@ -36,46 +37,93 @@ export function validateTweetContent(content: string): ValidationResult {
 }
 
 /**
- * Validate tweet object
+ * Validate tweet object (with threading support)
  */
-export function validateTweet(tweet: any): ValidationResult {
+export function validateTweet(tweet: any, enableThreading: boolean = true): ValidationResult {
   const errors: string[] = [];
-  
+
   if (!tweet || typeof tweet !== 'object') {
     errors.push('Tweet must be an object');
     return { isValid: false, errors };
   }
-  
+
   // Validate required fields
   if (!tweet.id || typeof tweet.id !== 'string') {
     errors.push('Tweet ID is required and must be a string');
   }
-  
-  // Validate content
-  const contentValidation = validateTweetContent(tweet.content);
+
+  // Validate content with threading support
+  const contentValidation = validateTweetContentWithThreading(tweet.content, tweet.media || [], enableThreading);
   if (!contentValidation.isValid) {
     errors.push(...contentValidation.errors);
   }
-  
+
   // Validate status
   const validStatuses = ['queued', 'posting', 'posted', 'failed'];
   if (!tweet.status || !validStatuses.includes(tweet.status)) {
     errors.push('Tweet status must be one of: ' + validStatuses.join(', '));
   }
-  
+
   // Validate dates
   if (tweet.createdAt && !(tweet.createdAt instanceof Date) && isNaN(Date.parse(tweet.createdAt))) {
     errors.push('createdAt must be a valid date');
   }
-  
+
   if (tweet.scheduledFor && !(tweet.scheduledFor instanceof Date) && isNaN(Date.parse(tweet.scheduledFor))) {
     errors.push('scheduledFor must be a valid date');
   }
-  
+
   if (tweet.postedAt && !(tweet.postedAt instanceof Date) && isNaN(Date.parse(tweet.postedAt))) {
     errors.push('postedAt must be a valid date');
   }
-  
+
+  return {
+    isValid: errors.length === 0,
+    errors
+  };
+}
+
+/**
+ * Legacy validate tweet object (without threading)
+ */
+export function validateTweetLegacy(tweet: any): ValidationResult {
+  const errors: string[] = [];
+
+  if (!tweet || typeof tweet !== 'object') {
+    errors.push('Tweet must be an object');
+    return { isValid: false, errors };
+  }
+
+  // Validate required fields
+  if (!tweet.id || typeof tweet.id !== 'string') {
+    errors.push('Tweet ID is required and must be a string');
+  }
+
+  // Validate content
+  const contentValidation = validateTweetContent(tweet.content);
+  if (!contentValidation.isValid) {
+    errors.push(...contentValidation.errors);
+  }
+
+  // Validate status
+  const validStatuses = ['queued', 'posting', 'posted', 'failed'];
+  if (!tweet.status || !validStatuses.includes(tweet.status)) {
+    errors.push('Tweet status must be one of: ' + validStatuses.join(', '));
+  }
+
+  // Validate dates
+  if (tweet.createdAt && !(tweet.createdAt instanceof Date) && isNaN(Date.parse(tweet.createdAt))) {
+    errors.push('createdAt must be a valid date');
+  }
+
+  if (tweet.scheduledFor && !(tweet.scheduledFor instanceof Date) && isNaN(Date.parse(tweet.scheduledFor))) {
+    errors.push('scheduledFor must be a valid date');
+  }
+
+  if (tweet.postedAt && !(tweet.postedAt instanceof Date) && isNaN(Date.parse(tweet.postedAt))) {
+    errors.push('postedAt must be a valid date');
+  }
+
   return {
     isValid: errors.length === 0,
     errors
@@ -163,27 +211,27 @@ export function validateUserSession(session: any): ValidationResult {
 }
 
 /**
- * Validate create tweet data
+ * Validate create tweet data (with threading support)
  */
-export function validateCreateTweetData(data: any): ValidationResult {
+export function validateCreateTweetData(data: any, enableThreading: boolean = true): ValidationResult {
   const errors: string[] = [];
-  
+
   if (!data || typeof data !== 'object') {
     errors.push('Data must be an object');
     return { isValid: false, errors };
   }
-  
-  // Validate content
-  const contentValidation = validateTweetContent(data.content);
+
+  // Validate content with threading support
+  const contentValidation = validateTweetContentWithThreading(data.content, data.media || [], enableThreading);
   if (!contentValidation.isValid) {
     errors.push(...contentValidation.errors);
   }
-  
+
   // Validate scheduledFor if present
   if (data.scheduledFor && !(data.scheduledFor instanceof Date) && isNaN(Date.parse(data.scheduledFor))) {
     errors.push('scheduledFor must be a valid date');
   }
-  
+
   return {
     isValid: errors.length === 0,
     errors
@@ -191,29 +239,57 @@ export function validateCreateTweetData(data: any): ValidationResult {
 }
 
 /**
- * Validate update tweet data
+ * Legacy validate create tweet data (without threading)
  */
-export function validateUpdateTweetData(data: any): ValidationResult {
+export function validateCreateTweetDataLegacy(data: any): ValidationResult {
   const errors: string[] = [];
-  
+
   if (!data || typeof data !== 'object') {
     errors.push('Data must be an object');
     return { isValid: false, errors };
   }
-  
+
+  // Validate content
+  const contentValidation = validateTweetContent(data.content);
+  if (!contentValidation.isValid) {
+    errors.push(...contentValidation.errors);
+  }
+
+  // Validate scheduledFor if present
+  if (data.scheduledFor && !(data.scheduledFor instanceof Date) && isNaN(Date.parse(data.scheduledFor))) {
+    errors.push('scheduledFor must be a valid date');
+  }
+
+  return {
+    isValid: errors.length === 0,
+    errors
+  };
+}
+
+/**
+ * Validate update tweet data (with threading support)
+ */
+export function validateUpdateTweetData(data: any, enableThreading: boolean = true): ValidationResult {
+  const errors: string[] = [];
+
+  if (!data || typeof data !== 'object') {
+    errors.push('Data must be an object');
+    return { isValid: false, errors };
+  }
+
   // ID is required
   if (!data.id || typeof data.id !== 'string') {
     errors.push('ID is required and must be a string');
   }
-  
+
   // Validate content if present
   if (data.content !== undefined) {
-    const contentValidation = validateTweetContent(data.content);
+    const contentValidation = validateTweetContentWithThreading(data.content, data.media || [], enableThreading);
     if (!contentValidation.isValid) {
       errors.push(...contentValidation.errors);
     }
   }
-  
+
   // Validate status if present
   if (data.status !== undefined) {
     const validStatuses = ['queued', 'posting', 'posted', 'failed'];
@@ -221,12 +297,55 @@ export function validateUpdateTweetData(data: any): ValidationResult {
       errors.push('status must be one of: ' + validStatuses.join(', '));
     }
   }
-  
+
   // Validate dates if present
   if (data.scheduledFor && !(data.scheduledFor instanceof Date) && isNaN(Date.parse(data.scheduledFor))) {
     errors.push('scheduledFor must be a valid date');
   }
-  
+
+  return {
+    isValid: errors.length === 0,
+    errors
+  };
+}
+
+/**
+ * Legacy validate update tweet data (without threading)
+ */
+export function validateUpdateTweetDataLegacy(data: any): ValidationResult {
+  const errors: string[] = [];
+
+  if (!data || typeof data !== 'object') {
+    errors.push('Data must be an object');
+    return { isValid: false, errors };
+  }
+
+  // ID is required
+  if (!data.id || typeof data.id !== 'string') {
+    errors.push('ID is required and must be a string');
+  }
+
+  // Validate content if present
+  if (data.content !== undefined) {
+    const contentValidation = validateTweetContent(data.content);
+    if (!contentValidation.isValid) {
+      errors.push(...contentValidation.errors);
+    }
+  }
+
+  // Validate status if present
+  if (data.status !== undefined) {
+    const validStatuses = ['queued', 'posting', 'posted', 'failed'];
+    if (!validStatuses.includes(data.status)) {
+      errors.push('status must be one of: ' + validStatuses.join(', '));
+    }
+  }
+
+  // Validate dates if present
+  if (data.scheduledFor && !(data.scheduledFor instanceof Date) && isNaN(Date.parse(data.scheduledFor))) {
+    errors.push('scheduledFor must be a valid date');
+  }
+
   return {
     isValid: errors.length === 0,
     errors

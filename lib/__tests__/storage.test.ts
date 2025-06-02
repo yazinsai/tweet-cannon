@@ -154,22 +154,32 @@ export function testConfigOperations() {
 export function testValidation() {
   // Test invalid tweet content
   try {
-    addTweet({ content: '' });
+    addTweet({ content: '' }, false); // Disable threading for this test
     throw new Error('Should have failed with empty content');
   } catch (error) {
     if (!(error as Error).message.includes('Invalid tweet data')) {
       throw new Error('Wrong error message for empty content');
     }
   }
-  
-  // Test tweet too long
+
+  // Test tweet too long (without threading)
   try {
-    addTweet({ content: 'a'.repeat(300) });
+    addTweet({ content: 'a'.repeat(300) }, false); // Disable threading for this test
     throw new Error('Should have failed with long content');
   } catch (error) {
     if (!(error as Error).message.includes('exceeds')) {
       throw new Error('Wrong error message for long content');
     }
+  }
+
+  // Test tweet too long (with threading) - should succeed
+  try {
+    const longTweet = addTweet({ content: 'a'.repeat(300) }, true); // Enable threading
+    if (!longTweet.id) {
+      throw new Error('Should have succeeded with threading enabled');
+    }
+  } catch (error) {
+    throw new Error('Should have succeeded with threading enabled');
   }
 }
 

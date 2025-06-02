@@ -8,7 +8,7 @@ interface UseTweetsReturn {
   tweets: Tweet[];
   isLoading: boolean;
   error: string | null;
-  addNewTweet: (data: CreateTweetData) => Promise<Tweet>;
+  addNewTweet: (data: CreateTweetData, enableThreading?: boolean) => Promise<Tweet>;
   updateExistingTweet: (id: string, data: Partial<UpdateTweetData>) => Promise<Tweet>;
   removeExistingTweet: (id: string) => Promise<void>;
   refreshTweets: () => Promise<void>;
@@ -36,10 +36,10 @@ export function useTweets(): UseTweetsReturn {
     }
   }, []);
 
-  const addNewTweet = useCallback(async (data: CreateTweetData): Promise<Tweet> => {
+  const addNewTweet = useCallback(async (data: CreateTweetData, enableThreading: boolean = true): Promise<Tweet> => {
     try {
       setError(null);
-      const newTweet = addTweet(data);
+      const newTweet = addTweet(data, enableThreading);
       setTweets(prev => [newTweet, ...prev]);
       return newTweet;
     } catch (err) {

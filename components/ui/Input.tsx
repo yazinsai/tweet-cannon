@@ -14,6 +14,8 @@ interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement
   characterCount?: {
     current: number;
     max: number;
+    additional?: string;
+    isThreaded?: boolean;
   };
   dragActive?: boolean;
 }
@@ -90,16 +92,29 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
             )}
           </div>
           {characterCount && (
-            <p className={cn(
-              'text-sm',
-              characterCount.current > characterCount.max
-                ? 'text-red-600'
-                : characterCount.current > characterCount.max * 0.9
-                ? 'text-yellow-600'
-                : 'text-gray-500'
-            )}>
-              {characterCount.current}/{characterCount.max}
-            </p>
+            <div className="space-y-1">
+              <p className={cn(
+                'text-sm',
+                characterCount.current > characterCount.max
+                  ? 'text-red-600'
+                  : characterCount.current > characterCount.max * 0.9
+                  ? 'text-yellow-600'
+                  : 'text-gray-500'
+              )}>
+                {characterCount.isThreaded ? (
+                  <span>
+                    {characterCount.current}/{characterCount.max} (first part)
+                  </span>
+                ) : (
+                  <span>{characterCount.current}/{characterCount.max}</span>
+                )}
+              </p>
+              {characterCount.additional && (
+                <p className="text-xs text-gray-400">
+                  {characterCount.additional}
+                </p>
+              )}
+            </div>
           )}
         </div>
       </div>

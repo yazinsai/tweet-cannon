@@ -3,6 +3,7 @@
  */
 
 import { Tweet, MediaAttachment } from '@/lib/types';
+import { getThreadPreview } from './tweetThreading';
 
 /**
  * Format tweet content for display
@@ -95,22 +96,77 @@ export function validateTweetContent(content: string, media: MediaAttachment[] =
 }
 
 /**
- * Get tweet character count info
+ * Get tweet character count info with threading support
  */
-export function getCharacterCountInfo(content: string) {
+export function getCharacterCountInfo(content: string, enableThreading: boolean = true) {
   const length = content.length;
   const maxLength = 280;
   const remaining = maxLength - length;
   const isOverLimit = length > maxLength;
   const isNearLimit = remaining <= 20 && !isOverLimit;
 
+  // Get thread info if content is long
+  const threadInfo = enableThreading ? getThreadPreview(content, maxLength) : null;
+
   return {
     current: length,
     max: maxLength,
     remaining,
-    isOverLimit,
+    isOverLimit: isOverLimit && !enableThreading,
     isNearLimit,
     percentage: (length / maxLength) * 100,
+    // Threading info
+    needsThreading: threadInfo?.needsThreading || false,
+    threadParts: threadInfo?.partCount || 1,
+    firstPartLength: threadInfo?.firstPart?.length || length,
+    enableThreading
+  };
+}
+
+/**
+ * Get thread-aware validation for tweet content
+ */
+export function validateTweetContentWithThreading(
+  content: string,
+  media: MediaAttachment[] = [],
+  enableThreading: boolean = true
+): {
+  isValid: boolean;
+  errors: string[];
+  warnings: string[];
+} {
+  const errors: string[] = [];
+  const warnings: string[] = [];
+
+  // Check if content or media is provided
+  if (!content.trim() && media.length === 0) {
+    errors.push('Tweet must have content or media');
+  }
+
+  // Check content length with threading consideration
+  if (content.length > 280) {
+    if (enableThreading) {
+      const threadInfo = getThreadPreview(content);
+      warnings.push(`Long tweet will be split into ${threadInfo.partCount} parts`);
+
+      // Validate that threading will work properly
+      if (threadInfo.partCount > 25) { // Twitter's thread limit
+        errors.push('Tweet is too long even for threading (max 25 parts)');
+      }
+    } else {
+      errors.push('Tweet content exceeds 280 characters');
+    }
+  }
+
+  // Check media count
+  if (media.length > 4) {
+    errors.push('Maximum 4 images allowed per tweet');
+  }
+
+  return {
+    isValid: errors.length === 0,
+    errors,
+    warnings,
   };
 }
 

@@ -50,7 +50,7 @@ export default function TestStoragePage() {
         return;
       }
 
-      const tweet = addTweet({ content: newTweetContent });
+      const tweet = addTweet({ content: newTweetContent }, true);
       setNewTweetContent('');
       setSuccess(`Tweet added: ${tweet.id}`);
       loadData();

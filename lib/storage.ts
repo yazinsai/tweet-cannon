@@ -134,16 +134,16 @@ export function getTweets(): Tweet[] {
 }
 
 /**
- * Save tweets to storage
+ * Save tweets to storage (with threading support)
  */
-export function saveTweets(tweets: Tweet[]): void {
+export function saveTweets(tweets: Tweet[], enableThreading: boolean = true): void {
   if (!isStorageAvailable()) {
     throw new Error(ERROR_MESSAGES.STORAGE_NOT_AVAILABLE);
   }
 
-  // Validate all tweets
+  // Validate all tweets with threading support
   for (const tweet of tweets) {
-    const validation = validateTweet(tweet);
+    const validation = validateTweet(tweet, enableThreading);
     if (!validation.isValid) {
       throw new Error(`Invalid tweet: ${validation.errors.join(', ')}`);
     }
@@ -153,10 +153,10 @@ export function saveTweets(tweets: Tweet[]): void {
 }
 
 /**
- * Add a new tweet to the queue
+ * Add a new tweet to the queue (with threading support)
  */
-export function addTweet(data: CreateTweetData): Tweet {
-  const validation = validateCreateTweetData(data);
+export function addTweet(data: CreateTweetData, enableThreading: boolean = true): Tweet {
+  const validation = validateCreateTweetData(data, enableThreading);
   if (!validation.isValid) {
     throw new Error(`Invalid tweet data: ${validation.errors.join(', ')}`);
   }
@@ -176,16 +176,16 @@ export function addTweet(data: CreateTweetData): Tweet {
   };
 
   tweets.push(tweet);
-  saveTweets(tweets);
+  saveTweets(tweets, enableThreading);
 
   return tweet;
 }
 
 /**
- * Update an existing tweet
+ * Update an existing tweet (with threading support)
  */
-export function updateTweet(data: UpdateTweetData): Tweet {
-  const validation = validateUpdateTweetData(data);
+export function updateTweet(data: UpdateTweetData, enableThreading: boolean = true): Tweet {
+  const validation = validateUpdateTweetData(data, enableThreading);
   if (!validation.isValid) {
     throw new Error(`Invalid update data: ${validation.errors.join(', ')}`);
   }
@@ -211,7 +211,7 @@ export function updateTweet(data: UpdateTweetData): Tweet {
   }
 
   tweets[index] = tweet;
-  saveTweets(tweets);
+  saveTweets(tweets, enableThreading);
 
   return tweet;
 }
@@ -219,7 +219,7 @@ export function updateTweet(data: UpdateTweetData): Tweet {
 /**
  * Delete a tweet
  */
-export function deleteTweet(id: string): boolean {
+export function deleteTweet(id: string, enableThreading: boolean = true): boolean {
   const tweets = getTweets();
   const index = tweets.findIndex(t => t.id === id);
 
@@ -228,7 +228,7 @@ export function deleteTweet(id: string): boolean {
   }
 
   tweets.splice(index, 1);
-  saveTweets(tweets);
+  saveTweets(tweets, enableThreading);
 
   return true;
 }

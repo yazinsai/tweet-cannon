@@ -7,6 +7,8 @@ import { Card, CardContent, CardFooter } from '@/components/ui/Card';
 import { Modal, ModalContent, ModalFooter } from '@/components/ui/Modal';
 import { Tweet } from '@/lib/types';
 import { formatDate, formatRelativeTime, truncateText } from '@/lib/utils';
+import { getCharacterCountInfo } from '@/utils/tweetUtils';
+import { splitTextIntoThread } from '@/utils/tweetThreading';
 import { deleteTweet, updateTweet } from '@/lib/storage';
 
 interface TweetCardProps {
@@ -116,6 +118,7 @@ const TweetCard: React.FC<TweetCardProps> = ({
           message: tweet.content,
           cookies: session.cookies,
           mediaIds: mediaIds.length > 0 ? mediaIds : undefined,
+          enableThreading: true, // Enable threading by default
         }),
       });
 
@@ -184,7 +187,11 @@ const TweetCard: React.FC<TweetCardProps> = ({
   const canPost = tweet.status === 'queued' || tweet.status === 'failed';
   const canEdit = tweet.status === 'queued' || tweet.status === 'failed';
   const canDelete = tweet.status !== 'posting';
-  const isOverLimit = editContent.length > 280;
+
+  // Get character count info with threading support
+  const editCharInfo = getCharacterCountInfo(editContent, true);
+  const tweetCharInfo = getCharacterCountInfo(tweet.content, true);
+  const isOverLimit = !editCharInfo.enableThreading && editCharInfo.isOverLimit;
 
   return (
     <>
@@ -206,12 +213,21 @@ const TweetCard: React.FC<TweetCardProps> = ({
                     onChange={(e) => setEditContent(e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     rows={3}
-                    maxLength={280}
+                    placeholder="What's happening? (Long tweets will be posted as threads)"
                   />
                   <div className={`text-right text-xs mt-1 ${
-                    isOverLimit ? 'text-red-600' : 'text-gray-500'
+                    editCharInfo.isOverLimit ? 'text-red-600' : editCharInfo.isNearLimit ? 'text-amber-500' : 'text-gray-500'
                   }`}>
-                    {editContent.length}/280
+                    {editCharInfo.needsThreading ? (
+                      <span>
+                        {editCharInfo.firstPartLength}/280 (first part)
+                        <span className="ml-2 text-gray-400">
+                          {editCharInfo.current} total, {editCharInfo.threadParts} parts
+                        </span>
+                      </span>
+                    ) : (
+                      <span>{editCharInfo.current}/280</span>
+                    )}
                   </div>
                 </div>
 
@@ -233,9 +249,43 @@ const TweetCard: React.FC<TweetCardProps> = ({
               </div>
             ) : (
               <>
-                <p className="text-sm text-gray-900 whitespace-pre-wrap">
-                  {tweet.content}
-                </p>
+                {/* Thread Preview or Regular Content */}
+                {tweetCharInfo.needsThreading ? (
+                  <div className="space-y-3">
+                    {/* Thread Header */}
+                    <div className="flex items-center gap-2 text-xs text-blue-600 font-medium">
+                      <span>🧵</span>
+                      <span>Thread ({tweetCharInfo.threadParts} parts)</span>
+                    </div>
+
+                    {/* Thread Parts */}
+                    {(() => {
+                      const thread = splitTextIntoThread(tweet.content);
+                      return thread.parts.map((part, index) => (
+                        <div key={index}>
+                          <div className="text-sm text-gray-900 whitespace-pre-wrap bg-gray-50 rounded-lg p-3 border-l-4 border-blue-200">
+                            <div className="flex items-start gap-2">
+                              <span className="text-xs text-blue-600 font-medium bg-blue-100 rounded-full px-2 py-1 flex-shrink-0">
+                                {index + 1}
+                              </span>
+                              <span className="flex-1">{part}</span>
+                            </div>
+                          </div>
+                          {/* Dotted separator between parts */}
+                          {index < thread.parts.length - 1 && (
+                            <div className="flex justify-center py-2">
+                              <div className="border-t-2 border-dotted border-gray-300 w-16"></div>
+                            </div>
+                          )}
+                        </div>
+                      ));
+                    })()}
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-900 whitespace-pre-wrap">
+                    {tweet.content}
+                  </p>
+                )}
 
                 {/* Media Attachments */}
                 {tweet.media && tweet.media.length > 0 && (
@@ -306,11 +356,32 @@ const TweetCard: React.FC<TweetCardProps> = ({
         <CardFooter className="flex justify-between items-center pt-0">
           <div className="text-xs text-gray-500 space-y-1">
             <div>
-              {isEditing ? editContent.length : tweet.content.length}/280 characters
+              {isEditing ? (
+                editCharInfo.needsThreading ? (
+                  <span>
+                    {editCharInfo.firstPartLength}/280 (first part), {editCharInfo.threadParts} parts total
+                  </span>
+                ) : (
+                  <span>{editCharInfo.current}/280 characters</span>
+                )
+              ) : (
+                tweetCharInfo.needsThreading ? (
+                  <span>
+                    {tweetCharInfo.firstPartLength}/280 (first part), {tweetCharInfo.threadParts} parts total
+                  </span>
+                ) : (
+                  <span>{tweetCharInfo.current}/280 characters</span>
+                )
+              )}
             </div>
             {tweet.media && tweet.media.length > 0 && (
               <div>
                 📷 {tweet.media.length} image{tweet.media.length > 1 ? 's' : ''}
+              </div>
+            )}
+            {!isEditing && tweetCharInfo.needsThreading && (
+              <div className="text-blue-600">
+                🧵 Will post as thread
               </div>
             )}
           </div>
@@ -352,7 +423,10 @@ const TweetCard: React.FC<TweetCardProps> = ({
                     loading={isPosting}
                     disabled={isPosting}
                   >
-                    {tweet.status === 'failed' ? 'Retry' : 'Post Now'}
+                    {tweet.status === 'failed'
+                      ? (tweetCharInfo.needsThreading ? 'Retry Thread' : 'Retry')
+                      : (tweetCharInfo.needsThreading ? 'Post Thread' : 'Post Now')
+                    }
                   </Button>
                 )}
 

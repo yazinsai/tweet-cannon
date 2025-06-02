@@ -7,6 +7,7 @@ import { useTweetPosting } from '@/hooks/useTweetPosting';
 import { createImageEventHandlers } from '@/lib/imageHandlers';
 import { MEDIA_LIMITS } from '@/lib/media';
 import { cn } from '@/lib/utils';
+import { getCharacterCountInfo, validateTweetContentWithThreading } from '@/utils/tweetUtils';
 
 interface TweetComposerProps {
   onSuccess?: (message: string) => void;
@@ -15,6 +16,7 @@ interface TweetComposerProps {
   submitButtonText?: string;
   showSuccessMessage?: boolean;
   className?: string;
+  enableThreading?: boolean;
 }
 
 export function TweetComposer({
@@ -23,7 +25,8 @@ export function TweetComposer({
   placeholder = "What's happening?",
   submitButtonText = 'Post Tweet',
   showSuccessMessage = true,
-  className = ''
+  className = '',
+  enableThreading = true
 }: TweetComposerProps) {
   const [message, setMessage] = useState('');
   const [images, setImages] = useState<MediaAttachment[]>([]);
@@ -47,9 +50,11 @@ export function TweetComposer({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!message.trim() && images.length === 0) {
-      const error = 'Please enter a message or add an image';
-      onError?.(error);
+    // Validate with threading support
+    const validation = validateTweetContentWithThreading(message, images, enableThreading);
+
+    if (!validation.isValid) {
+      onError?.(validation.errors.join(', '));
       return;
     }
 
@@ -73,7 +78,9 @@ export function TweetComposer({
     }
   };
 
-  const isOverLimit = message.length > 280;
+  // Get character count info with threading support
+  const charInfo = getCharacterCountInfo(message, enableThreading);
+  const validation = validateTweetContentWithThreading(message, images, enableThreading);
   const isEmpty = message.trim().length === 0 && images.length === 0;
 
   return (
@@ -109,9 +116,24 @@ export function TweetComposer({
               {images.length > 0 && (
                 <span className="mr-4">📷 {images.length} image{images.length > 1 ? 's' : ''}</span>
               )}
+              {charInfo.needsThreading && (
+                <span className="mr-4 text-blue-600">🧵 {charInfo.threadParts} parts</span>
+              )}
+              {validation.warnings.length > 0 && (
+                <span className="mr-4 text-amber-600">⚠️ {validation.warnings[0]}</span>
+              )}
             </div>
-            <div className={`text-sm ${isOverLimit ? 'text-red-500' : 'text-gray-500'}`}>
-              {message.length}/280
+            <div className={`text-sm ${charInfo.isOverLimit ? 'text-red-500' : charInfo.isNearLimit ? 'text-amber-500' : 'text-gray-500'}`}>
+              {charInfo.needsThreading ? (
+                <span>
+                  {charInfo.firstPartLength}/280 (first part)
+                  <span className="ml-2 text-xs text-gray-400">
+                    {charInfo.current} total
+                  </span>
+                </span>
+              ) : (
+                <span>{charInfo.current}/280</span>
+              )}
             </div>
           </div>
         </div>
@@ -126,10 +148,10 @@ export function TweetComposer({
         <div className="flex justify-end">
           <button
             type="submit"
-            disabled={isEmpty || isOverLimit || isPosting}
+            disabled={isEmpty || !validation.isValid || isPosting}
             className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            {isPosting ? 'Posting...' : submitButtonText}
+            {isPosting ? 'Posting...' : charInfo.needsThreading ? 'Post Thread' : submitButtonText}
           </button>
         </div>
       </form>
