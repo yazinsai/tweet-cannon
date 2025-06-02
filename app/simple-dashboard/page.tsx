@@ -41,15 +41,15 @@ const SimpleDashboard: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-slate-600"></div>
+      <div className="min-h-screen bg-gradient-to-br from-background to-muted flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
       </div>
     );
   }
 
   return (
     <AuthGuard>
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100">
+      <div className="min-h-screen bg-gradient-to-br from-background to-muted">
         <AppHeader
           showNavigation={true}
           currentPage="simple-dashboard"
@@ -67,15 +67,15 @@ const SimpleDashboard: React.FC = () => {
         {/* Collapsible Queue */}
         {showQueue && (
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
-            <div className="bg-white rounded-2xl shadow-lg p-6">
+            <div className="bg-card rounded-2xl shadow-lg p-6 border border-border">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-lg font-semibold text-gray-900 flex items-center">
+                <h2 className="text-lg font-semibold text-card-foreground flex items-center">
                   <span className="mr-2">📋</span>
                   Tweet Queue
                 </h2>
                 <button
                   onClick={toggleQueue}
-                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                  className="text-muted-foreground hover:text-foreground transition-colors"
                 >
                   ✕
                 </button>
@@ -83,11 +83,11 @@ const SimpleDashboard: React.FC = () => {
 
               {queuedTweets.length === 0 ? (
                 <div className="text-center py-12">
-                  <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
                     <span className="text-2xl">📝</span>
                   </div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">No tweets in queue</h3>
-                  <p className="text-gray-600">Add some tweets to get started!</p>
+                  <h3 className="text-lg font-medium text-card-foreground mb-2">No tweets in queue</h3>
+                  <p className="text-muted-foreground">Add some tweets to get started!</p>
                 </div>
               ) : (
                 <div className="space-y-4 max-h-96 overflow-y-auto">
@@ -95,35 +95,35 @@ const SimpleDashboard: React.FC = () => {
                     const tweetCharInfo = getCharacterCountInfo(tweet.content, true);
 
                     return (
-                      <div key={tweet.id} className="border border-gray-200 rounded-xl p-4">
+                      <div key={tweet.id} className="border border-border rounded-xl p-4 bg-card">
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
                             {/* Thread Preview or Regular Content */}
                             {tweetCharInfo.needsThreading ? (
                               <div className="space-y-3 mb-3">
                                 {/* Thread Header */}
-                                <div className="flex items-center gap-2 text-xs text-blue-600 font-medium">
+                                <div className="flex items-center gap-2 text-xs text-blue-600 dark:text-blue-400 font-medium">
                                   <span>🧵</span>
                                   <span>Thread ({tweetCharInfo.threadParts} parts)</span>
                                 </div>
 
                                 {/* Show only first part in collapsed view */}
-                                <div className="text-sm text-gray-900 whitespace-pre-wrap bg-gray-50 rounded-lg p-3 border-l-4 border-blue-200">
+                                <div className="text-sm text-card-foreground whitespace-pre-wrap bg-muted rounded-lg p-3 border-l-4 border-blue-200 dark:border-blue-600">
                                   <div className="flex items-start gap-2">
-                                    <span className="text-xs text-blue-600 font-medium bg-blue-100 rounded-full px-2 py-1 flex-shrink-0">
+                                    <span className="text-xs text-blue-600 dark:text-blue-400 font-medium bg-blue-100 dark:bg-blue-900/20 rounded-full px-2 py-1 flex-shrink-0">
                                       1
                                     </span>
                                     <span className="flex-1">{splitTextIntoThread(tweet.content).parts[0]}</span>
                                   </div>
                                 </div>
                                 {tweetCharInfo.threadParts > 1 && (
-                                  <div className="text-xs text-gray-500 text-center">
+                                  <div className="text-xs text-muted-foreground text-center">
                                     ... and {tweetCharInfo.threadParts - 1} more part{tweetCharInfo.threadParts > 2 ? 's' : ''}
                                   </div>
                                 )}
                               </div>
                             ) : (
-                              <p className="text-gray-900 mb-2">{tweet.content}</p>
+                              <p className="text-card-foreground mb-2">{tweet.content}</p>
                             )}
 
                             {/* Media Attachments */}
@@ -132,7 +132,7 @@ const SimpleDashboard: React.FC = () => {
                                 {tweet.media.slice(0, 2).map((media) => (
                                   <div
                                     key={media.id}
-                                    className="relative aspect-square border border-gray-200 rounded-lg overflow-hidden bg-gray-50"
+                                    className="relative aspect-square border border-border rounded-lg overflow-hidden bg-muted"
                                   >
                                     <img
                                       src={media.preview}
@@ -142,14 +142,14 @@ const SimpleDashboard: React.FC = () => {
                                   </div>
                                 ))}
                                 {tweet.media.length > 2 && (
-                                  <div className="text-xs text-gray-500 text-center col-span-2">
+                                  <div className="text-xs text-muted-foreground text-center col-span-2">
                                     +{tweet.media.length - 2} more image{tweet.media.length > 3 ? 's' : ''}
                                   </div>
                                 )}
                               </div>
                             )}
 
-                            <div className="flex items-center text-sm text-gray-500 flex-wrap gap-2">
+                            <div className="flex items-center text-sm text-muted-foreground flex-wrap gap-2">
                               <span>
                                 Added {new Date(tweet.createdAt).toLocaleDateString()}
                               </span>
@@ -159,11 +159,11 @@ const SimpleDashboard: React.FC = () => {
                                 </span>
                               )}
                               {tweetCharInfo.needsThreading && (
-                                <span className="text-blue-600">
+                                <span className="text-blue-600 dark:text-blue-400">
                                   🧵 Thread
                                 </span>
                               )}
-                              <span className="inline-flex items-center px-2 py-1 bg-slate-100 text-slate-700 rounded-full text-xs font-medium">
+                              <span className="inline-flex items-center px-2 py-1 bg-secondary text-secondary-foreground rounded-full text-xs font-medium">
                                 Queued
                               </span>
                             </div>
@@ -171,7 +171,7 @@ const SimpleDashboard: React.FC = () => {
 
                           <button
                             onClick={() => handleDeleteTweet(tweet.id)}
-                            className="ml-4 text-gray-400 hover:text-red-500 transition-colors"
+                            className="ml-4 text-muted-foreground hover:text-red-500 dark:hover:text-red-400 transition-colors"
                           >
                             🗑️
                           </button>

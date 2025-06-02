@@ -29,7 +29,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         {label && (
           <label
             htmlFor={inputId}
-            className="block text-sm font-medium text-gray-700"
+            className="block text-sm font-medium text-foreground"
           >
             {label}
           </label>
@@ -37,7 +37,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         <input
           id={inputId}
           className={cn(
-            'flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50',
+            'flex h-10 w-full rounded-md border border-border bg-input px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50',
             error && 'border-red-500 focus:ring-red-500',
             className
           )}
@@ -45,10 +45,10 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           {...props}
         />
         {error && (
-          <p className="text-sm text-red-600">{error}</p>
+          <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
         )}
         {helperText && !error && (
-          <p className="text-sm text-gray-500">{helperText}</p>
+          <p className="text-sm text-muted-foreground">{helperText}</p>
         )}
       </div>
     );
@@ -64,7 +64,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
         {label && (
           <label
             htmlFor={textareaId}
-            className="block text-sm font-medium text-gray-700"
+            className="block text-sm font-medium text-foreground"
           >
             {label}
           </label>
@@ -72,10 +72,10 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
         <textarea
           id={textareaId}
           className={cn(
-            'flex min-h-[80px] w-full rounded-md border bg-white px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 transition-colors',
+            'flex min-h-[80px] w-full rounded-md border bg-input text-foreground px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 transition-colors',
             dragActive
-              ? 'border-slate-500 bg-slate-50'
-              : 'border-gray-300',
+              ? 'border-ring bg-accent'
+              : 'border-border',
             error && 'border-red-500 focus:ring-red-500',
             className
           )}
@@ -85,10 +85,10 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
         <div className="flex justify-between items-center">
           <div>
             {error && (
-              <p className="text-sm text-red-600">{error}</p>
+              <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
             )}
             {helperText && !error && (
-              <p className="text-sm text-gray-500">{helperText}</p>
+              <p className="text-sm text-muted-foreground">{helperText}</p>
             )}
           </div>
           {characterCount && (
@@ -96,10 +96,10 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
               <p className={cn(
                 'text-sm',
                 characterCount.current > characterCount.max
-                  ? 'text-red-600'
+                  ? 'text-red-600 dark:text-red-400'
                   : characterCount.current > characterCount.max * 0.9
-                  ? 'text-yellow-600'
-                  : 'text-gray-500'
+                  ? 'text-yellow-600 dark:text-yellow-400'
+                  : 'text-muted-foreground'
               )}>
                 {characterCount.isThreaded ? (
                   <span>
@@ -110,7 +110,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
                 )}
               </p>
               {characterCount.additional && (
-                <p className="text-xs text-gray-400">
+                <p className="text-xs text-muted-foreground/70">
                   {characterCount.additional}
                 </p>
               )}

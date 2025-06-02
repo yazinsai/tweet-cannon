@@ -108,12 +108,12 @@ const RetrySettings: React.FC<RetrySettingsProps> = ({ className }) => {
 
       <CardContent className="space-y-6">
         {/* Auto-retry Toggle */}
-        <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+        <div className="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
           <div>
-            <h3 className="text-sm font-medium text-blue-800">
+            <h3 className="text-sm font-medium text-blue-800 dark:text-blue-300">
               Automatic Retry
             </h3>
-            <p className="text-xs text-blue-600">
+            <p className="text-xs text-blue-600 dark:text-blue-400">
               Automatically retry failed tweets based on error type
             </p>
           </div>
@@ -218,19 +218,19 @@ const RetrySettings: React.FC<RetrySettingsProps> = ({ className }) => {
             {Object.values(ErrorType).map((errorType) => (
               <label
                 key={errorType}
-                className="flex items-center space-x-3 p-2 border rounded-lg hover:bg-gray-50 cursor-pointer"
+                className="flex items-center space-x-3 p-2 border border-border rounded-lg hover:bg-muted cursor-pointer"
               >
                 <input
                   type="checkbox"
                   checked={config.retryableErrors.includes(errorType)}
                   onChange={() => handleRetryableErrorToggle(errorType)}
-                  className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
+                  className="w-4 h-4 text-blue-600 bg-background border-border rounded focus:ring-blue-500"
                 />
                 <div className="flex-1">
-                  <div className="text-sm font-medium text-gray-800 capitalize">
+                  <div className="text-sm font-medium text-card-foreground capitalize">
                     {errorType.replace('_', ' ')}
                   </div>
-                  <div className="text-xs text-gray-500">
+                  <div className="text-xs text-muted-foreground">
                     {getErrorTypeDescription(errorType)}
                   </div>
                 </div>

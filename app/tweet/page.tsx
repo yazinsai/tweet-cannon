@@ -236,7 +236,7 @@ export default function TweetPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-background to-muted py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-2xl mx-auto">
         <AppHeader
           subtitle="Quick setup for Twitter posting"
@@ -246,15 +246,15 @@ export default function TweetPage() {
         />
 
         {/* Success State */}
-        <div className="bg-white rounded-2xl shadow-lg p-8 mb-8">
+        <div className="bg-card rounded-2xl shadow-lg p-8 mb-8 border border-border">
           <div className="text-center">
-            <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <div className="w-20 h-20 bg-emerald-100 dark:bg-emerald-900/20 rounded-full flex items-center justify-center mx-auto mb-6">
               <span className="text-3xl">✅</span>
             </div>
-            <h2 className="text-2xl font-semibold text-gray-900 mb-3">
+            <h2 className="text-2xl font-semibold text-card-foreground mb-3">
               You're Connected!
             </h2>
-            <p className="text-gray-600 mb-8 max-w-md mx-auto">
+            <p className="text-muted-foreground mb-8 max-w-md mx-auto">
               Your Twitter account is successfully connected. You can now schedule tweets, manage your queue, and set up automated posting.
             </p>
 

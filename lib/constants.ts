@@ -9,6 +9,7 @@ export const STORAGE_KEYS = {
   SESSION: 'tweet-cannon-session',
   ENCRYPTION_KEY: 'tweet-cannon-key',
   DRAFTS: 'tweet-cannon-drafts',
+  THEME: 'tweet-cannon-theme',
 } as const;
 
 // Application limits

@@ -265,14 +265,14 @@ const SchedulerControls: React.FC<SchedulerControlsProps> = ({
         <div className="space-y-3">
           {/* Next Post Time */}
           {schedulerState.nextPostTime && (
-            <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+            <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
               <div className="flex items-center space-x-2">
                 <span className="text-lg">⏰</span>
                 <div>
-                  <p className="text-sm font-medium text-blue-800">
+                  <p className="text-sm font-medium text-blue-800 dark:text-blue-300">
                     Next Post Scheduled
                   </p>
-                  <p className="text-xs text-blue-600">
+                  <p className="text-xs text-blue-600 dark:text-blue-400">
                     {formatDate(schedulerState.nextPostTime)}
                     <span className="ml-1">
                       ({formatRelativeTime(schedulerState.nextPostTime)})
@@ -285,14 +285,14 @@ const SchedulerControls: React.FC<SchedulerControlsProps> = ({
 
           {/* Last Post Time */}
           {schedulerState.lastPostTime && (
-            <div className="p-3 bg-green-50 rounded-lg border border-green-200">
+            <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
               <div className="flex items-center space-x-2">
                 <span className="text-lg">✅</span>
                 <div>
-                  <p className="text-sm font-medium text-green-800">
+                  <p className="text-sm font-medium text-green-800 dark:text-green-300">
                     Last Post
                   </p>
-                  <p className="text-xs text-green-600">
+                  <p className="text-xs text-green-600 dark:text-green-400">
                     {formatRelativeTime(schedulerState.lastPostTime)}
                   </p>
                 </div>
@@ -302,26 +302,26 @@ const SchedulerControls: React.FC<SchedulerControlsProps> = ({
 
           {/* Statistics */}
           <div className="grid grid-cols-2 gap-3">
-            <div className="p-3 bg-gray-50 rounded-lg text-center">
+            <div className="p-3 bg-muted rounded-lg text-center">
               <p className="text-lg font-bold text-green-600">
                 {schedulerState.stats.totalPosted}
               </p>
-              <p className="text-xs text-gray-600">Posted</p>
+              <p className="text-xs text-muted-foreground">Posted</p>
             </div>
-            <div className="p-3 bg-gray-50 rounded-lg text-center">
+            <div className="p-3 bg-muted rounded-lg text-center">
               <p className="text-lg font-bold text-red-600">
                 {schedulerState.stats.totalFailed}
               </p>
-              <p className="text-xs text-gray-600">Failed</p>
+              <p className="text-xs text-muted-foreground">Failed</p>
             </div>
           </div>
 
           {/* Current Configuration */}
-          <div className="p-3 bg-gray-50 rounded-lg">
-            <p className="text-sm font-medium text-gray-700 mb-2">
+          <div className="p-3 bg-muted rounded-lg">
+            <p className="text-sm font-medium text-card-foreground mb-2">
               Current Schedule
             </p>
-            <div className="text-xs text-gray-600 space-y-1">
+            <div className="text-xs text-muted-foreground space-y-1">
               <p>
                 <strong>Frequency:</strong> Every {config.interval} hour{config.interval !== 1 ? 's' : ''}
               </p>
@@ -336,18 +336,18 @@ const SchedulerControls: React.FC<SchedulerControlsProps> = ({
 
         {/* Error Display */}
         {error && (
-          <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
-            <p className="text-sm text-red-600">{error}</p>
+          <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+            <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
           </div>
         )}
 
         {/* Last Error */}
         {schedulerState.stats.lastError && (
-          <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-            <p className="text-sm font-medium text-yellow-800 mb-1">
+          <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+            <p className="text-sm font-medium text-yellow-800 dark:text-yellow-300 mb-1">
               Last Error
             </p>
-            <p className="text-xs text-yellow-600">
+            <p className="text-xs text-yellow-600 dark:text-yellow-400">
               {schedulerState.stats.lastError}
             </p>
           </div>
@@ -355,8 +355,8 @@ const SchedulerControls: React.FC<SchedulerControlsProps> = ({
 
         {/* Auto-restart Info */}
         {schedulerState.isRunning && (
-          <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
-            <p className="text-sm text-blue-800">
+          <div className="p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+            <p className="text-sm text-blue-800 dark:text-blue-300">
               💡 <strong>Persistence:</strong> The scheduler will automatically restart when you return to this page
             </p>
           </div>
@@ -364,16 +364,16 @@ const SchedulerControls: React.FC<SchedulerControlsProps> = ({
 
         {/* Requirements Check */}
         {!session?.isValid && (
-          <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-            <p className="text-sm text-yellow-800">
+          <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+            <p className="text-sm text-yellow-800 dark:text-yellow-300">
               ⚠️ Authentication required to start scheduler
             </p>
           </div>
         )}
 
         {!config.enabled && (
-          <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-            <p className="text-sm text-yellow-800">
+          <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+            <p className="text-sm text-yellow-800 dark:text-yellow-300">
               ⚠️ Auto-posting must be enabled in settings
             </p>
           </div>

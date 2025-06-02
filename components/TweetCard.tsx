@@ -199,7 +199,7 @@ const TweetCard: React.FC<TweetCardProps> = ({
         <CardContent className="space-y-3">
           <div className="flex items-start justify-between">
             <StatusBadge status={tweet.status} />
-            <span className="text-xs text-gray-500">
+            <span className="text-xs text-muted-foreground">
               {formatRelativeTime(tweet.createdAt)}
             </span>
           </div>
@@ -211,17 +211,17 @@ const TweetCard: React.FC<TweetCardProps> = ({
                   <textarea
                     value={editContent}
                     onChange={(e) => setEditContent(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-border bg-input text-foreground rounded-md text-sm resize-none focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
                     rows={3}
                     placeholder="What's happening? (Long tweets will be posted as threads)"
                   />
                   <div className={`text-right text-xs mt-1 ${
-                    editCharInfo.isOverLimit ? 'text-red-600' : editCharInfo.isNearLimit ? 'text-amber-500' : 'text-gray-500'
+                    editCharInfo.isOverLimit ? 'text-red-600 dark:text-red-400' : editCharInfo.isNearLimit ? 'text-amber-500 dark:text-amber-400' : 'text-muted-foreground'
                   }`}>
                     {editCharInfo.needsThreading ? (
                       <span>
                         {editCharInfo.firstPartLength}/280 (first part)
-                        <span className="ml-2 text-gray-400">
+                        <span className="ml-2 text-muted-foreground/70">
                           {editCharInfo.current} total, {editCharInfo.threadParts} parts
                         </span>
                       </span>
@@ -232,7 +232,7 @@ const TweetCard: React.FC<TweetCardProps> = ({
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">
+                  <label className="block text-xs font-medium text-card-foreground mb-1">
                     Custom schedule time (optional)
                   </label>
                   <input
@@ -240,9 +240,9 @@ const TweetCard: React.FC<TweetCardProps> = ({
                     value={editScheduledFor}
                     onChange={(e) => setEditScheduledFor(e.target.value)}
                     min={new Date().toISOString().slice(0, 16)}
-                    className="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-2 py-1 border border-border bg-input text-foreground rounded text-xs focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
                   />
-                  <p className="text-xs text-gray-500 mt-1">
+                  <p className="text-xs text-muted-foreground mt-1">
                     Leave empty to post at next scheduled window
                   </p>
                 </div>
@@ -253,7 +253,7 @@ const TweetCard: React.FC<TweetCardProps> = ({
                 {tweetCharInfo.needsThreading ? (
                   <div className="space-y-3">
                     {/* Thread Header */}
-                    <div className="flex items-center gap-2 text-xs text-blue-600 font-medium">
+                    <div className="flex items-center gap-2 text-xs text-blue-600 dark:text-blue-400 font-medium">
                       <span>🧵</span>
                       <span>Thread ({tweetCharInfo.threadParts} parts)</span>
                     </div>
@@ -263,9 +263,9 @@ const TweetCard: React.FC<TweetCardProps> = ({
                       const thread = splitTextIntoThread(tweet.content);
                       return thread.parts.map((part, index) => (
                         <div key={index}>
-                          <div className="text-sm text-gray-900 whitespace-pre-wrap bg-gray-50 rounded-lg p-3 border-l-4 border-blue-200">
+                          <div className="text-sm text-card-foreground whitespace-pre-wrap bg-muted rounded-lg p-3 border-l-4 border-blue-200 dark:border-blue-800">
                             <div className="flex items-start gap-2">
-                              <span className="text-xs text-blue-600 font-medium bg-blue-100 rounded-full px-2 py-1 flex-shrink-0">
+                              <span className="text-xs text-blue-600 dark:text-blue-400 font-medium bg-blue-100 dark:bg-blue-900/20 rounded-full px-2 py-1 flex-shrink-0">
                                 {index + 1}
                               </span>
                               <span className="flex-1">{part}</span>
@@ -282,7 +282,7 @@ const TweetCard: React.FC<TweetCardProps> = ({
                     })()}
                   </div>
                 ) : (
-                  <p className="text-sm text-gray-900 whitespace-pre-wrap">
+                  <p className="text-sm text-card-foreground whitespace-pre-wrap">
                     {tweet.content}
                   </p>
                 )}
@@ -293,7 +293,7 @@ const TweetCard: React.FC<TweetCardProps> = ({
                     {tweet.media.map((media) => (
                       <div
                         key={media.id}
-                        className="relative aspect-square border border-gray-200 rounded-lg overflow-hidden bg-gray-50"
+                        className="relative aspect-square border border-border rounded-lg overflow-hidden bg-muted"
                       >
                         <img
                           src={media.preview}
@@ -332,19 +332,19 @@ const TweetCard: React.FC<TweetCardProps> = ({
                 )}
 
                 {tweet.scheduledFor && (
-                  <p className="text-xs text-blue-600">
+                  <p className="text-xs text-blue-600 dark:text-blue-400">
                     📅 Scheduled for {formatDate(tweet.scheduledFor)}
                   </p>
                 )}
 
                 {tweet.postedAt && (
-                  <p className="text-xs text-green-600">
+                  <p className="text-xs text-green-600 dark:text-green-400">
                     ✅ Posted {formatRelativeTime(tweet.postedAt)}
                   </p>
                 )}
 
                 {tweet.error && (
-                  <p className="text-xs text-red-600">
+                  <p className="text-xs text-red-600 dark:text-red-400">
                     ❌ Error: {tweet.error}
                   </p>
                 )}
@@ -354,7 +354,7 @@ const TweetCard: React.FC<TweetCardProps> = ({
         </CardContent>
 
         <CardFooter className="flex justify-between items-center pt-0">
-          <div className="text-xs text-gray-500 space-y-1">
+          <div className="text-xs text-muted-foreground space-y-1">
             <div>
               {isEditing ? (
                 editCharInfo.needsThreading ? (
@@ -380,7 +380,7 @@ const TweetCard: React.FC<TweetCardProps> = ({
               </div>
             )}
             {!isEditing && tweetCharInfo.needsThreading && (
-              <div className="text-blue-600">
+              <div className="text-blue-600 dark:text-blue-400">
                 🧵 Will post as thread
               </div>
             )}
@@ -454,8 +454,8 @@ const TweetCard: React.FC<TweetCardProps> = ({
         description="Are you sure you want to delete this tweet? This action cannot be undone."
       >
         <ModalContent>
-          <div className="bg-gray-50 rounded-md p-3">
-            <p className="text-sm text-gray-700">
+          <div className="bg-muted rounded-md p-3">
+            <p className="text-sm text-card-foreground">
               {truncateText(tweet.content, 100)}
             </p>
           </div>

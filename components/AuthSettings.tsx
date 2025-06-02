@@ -148,7 +148,7 @@ const AuthSettings: React.FC<AuthSettingsProps> = ({
     return (
       <Card className={className}>
         <CardContent className="flex items-center justify-center py-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
         </CardContent>
       </Card>
     );
@@ -170,22 +170,22 @@ const AuthSettings: React.FC<AuthSettingsProps> = ({
           {session ? (
             <>
               {/* Current Session Info */}
-              <div className="p-4 bg-gray-50 rounded-lg space-y-2">
+              <div className="p-4 bg-muted rounded-lg space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-gray-700">Username:</span>
-                  <span className="text-sm text-gray-900">
+                  <span className="text-sm font-medium text-card-foreground">Username:</span>
+                  <span className="text-sm text-card-foreground">
                     {session.username || 'Unknown'}
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-gray-700">Last Validated:</span>
-                  <span className="text-sm text-gray-900">
+                  <span className="text-sm font-medium text-card-foreground">Last Validated:</span>
+                  <span className="text-sm text-card-foreground">
                     {session.lastValidated.toLocaleDateString()}
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-gray-700">Status:</span>
-                  <Badge 
+                  <span className="text-sm font-medium text-card-foreground">Status:</span>
+                  <Badge
                     variant={session.isValid ? 'success' : 'danger'}
                     size="sm"
                   >
@@ -214,8 +214,8 @@ const AuthSettings: React.FC<AuthSettingsProps> = ({
               </div>
 
               {!session.isValid && (
-                <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                  <p className="text-sm text-yellow-800">
+                <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+                  <p className="text-sm text-yellow-800 dark:text-yellow-300">
                     ⚠️ Your authentication is invalid. Please update your cookies.
                   </p>
                   <Button
@@ -232,8 +232,8 @@ const AuthSettings: React.FC<AuthSettingsProps> = ({
             <>
               {/* No Authentication */}
               <div className="text-center py-6">
-                <div className="text-gray-400 text-4xl mb-2">🔐</div>
-                <p className="text-gray-600 mb-4">
+                <div className="text-muted-foreground text-4xl mb-2">🔐</div>
+                <p className="text-muted-foreground mb-4">
                   No authentication configured
                 </p>
                 <Button onClick={handleSetupAuth}>
@@ -255,24 +255,24 @@ const AuthSettings: React.FC<AuthSettingsProps> = ({
       >
         <ModalContent>
           <div className="space-y-4">
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <h3 className="font-semibold text-blue-800 mb-3">📋 How to get your cookies:</h3>
-              
+            <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+              <h3 className="font-semibold text-blue-800 dark:text-blue-300 mb-3">📋 How to get your cookies:</h3>
+
               <div className="space-y-3">
                 <div>
-                  <h4 className="font-semibold text-blue-800 mb-2">Step 1: Get auth_token</h4>
-                  <ol className="list-decimal list-inside space-y-1 text-blue-700 text-sm ml-4">
+                  <h4 className="font-semibold text-blue-800 dark:text-blue-300 mb-2">Step 1: Get auth_token</h4>
+                  <ol className="list-decimal list-inside space-y-1 text-blue-700 dark:text-blue-400 text-sm ml-4">
                     <li>Open Twitter/X and make sure you're logged in</li>
                     <li>Press F12 → Application → Cookies → https://x.com</li>
-                    <li>Find <code className="bg-blue-100 px-1 rounded">auth_token</code> and copy its value</li>
+                    <li>Find <code className="bg-blue-100 dark:bg-blue-800 px-1 rounded">auth_token</code> and copy its value</li>
                   </ol>
                 </div>
 
                 <div>
-                  <h4 className="font-semibold text-blue-800 mb-2">Step 2: Get other cookies</h4>
-                  <ol className="list-decimal list-inside space-y-1 text-blue-700 text-sm ml-4">
+                  <h4 className="font-semibold text-blue-800 dark:text-blue-300 mb-2">Step 2: Get other cookies</h4>
+                  <ol className="list-decimal list-inside space-y-1 text-blue-700 dark:text-blue-400 text-sm ml-4">
                     <li>Go to Console tab in DevTools</li>
-                    <li>Run: <code className="bg-gray-800 text-green-400 px-1 rounded">document.cookie</code></li>
+                    <li>Run: <code className="bg-gray-800 dark:bg-gray-200 text-green-400 dark:text-green-600 px-1 rounded">document.cookie</code></li>
                     <li>Copy the output</li>
                   </ol>
                 </div>
@@ -296,8 +296,8 @@ const AuthSettings: React.FC<AuthSettingsProps> = ({
             />
 
             {validationError && (
-              <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
-                <p className="text-sm text-red-600">{validationError}</p>
+              <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                <p className="text-sm text-red-600 dark:text-red-400">{validationError}</p>
               </div>
             )}
           </div>

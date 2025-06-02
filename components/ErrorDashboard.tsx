@@ -165,27 +165,27 @@ const ErrorDashboard: React.FC<ErrorDashboardProps> = ({ className }) => {
       <CardContent className="space-y-4">
         {/* Statistics */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <div className="p-3 bg-gray-50 rounded-lg text-center">
-            <div className="text-lg font-bold text-gray-800">{stats.total || 0}</div>
-            <div className="text-xs text-gray-600">Total Errors</div>
+          <div className="p-3 bg-muted rounded-lg text-center">
+            <div className="text-lg font-bold text-card-foreground">{stats.total || 0}</div>
+            <div className="text-xs text-muted-foreground">Total Errors</div>
           </div>
-          <div className="p-3 bg-green-50 rounded-lg text-center">
+          <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg text-center">
             <div className="text-lg font-bold text-green-600">{stats.resolved || 0}</div>
-            <div className="text-xs text-gray-600">Resolved</div>
+            <div className="text-xs text-muted-foreground">Resolved</div>
           </div>
-          <div className="p-3 bg-yellow-50 rounded-lg text-center">
+          <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg text-center">
             <div className="text-lg font-bold text-yellow-600">{stats.pending || 0}</div>
-            <div className="text-xs text-gray-600">Pending</div>
+            <div className="text-xs text-muted-foreground">Pending</div>
           </div>
-          <div className="p-3 bg-blue-50 rounded-lg text-center">
+          <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-center">
             <div className="text-lg font-bold text-blue-600">{stats.retrySuccess || 0}</div>
-            <div className="text-xs text-gray-600">Auto-Fixed</div>
+            <div className="text-xs text-muted-foreground">Auto-Fixed</div>
           </div>
         </div>
 
         {/* Filters */}
         <div className="flex flex-wrap items-center gap-2">
-          <span className="text-sm text-gray-600">Filter:</span>
+          <span className="text-sm text-muted-foreground">Filter:</span>
           {['all', 'pending', 'resolved'].map((filterOption) => (
             <Button
               key={filterOption}
@@ -197,12 +197,12 @@ const ErrorDashboard: React.FC<ErrorDashboardProps> = ({ className }) => {
               {filterOption}
             </Button>
           ))}
-          
-          <span className="text-sm text-gray-600 ml-4">Type:</span>
+
+          <span className="text-sm text-muted-foreground ml-4">Type:</span>
           <select
             value={selectedType}
             onChange={(e) => setSelectedType(e.target.value as any)}
-            className="text-xs border rounded px-2 py-1"
+            className="text-xs border border-border bg-background text-foreground rounded px-2 py-1"
           >
             <option value="all">All Types</option>
             {Object.values(ErrorType).map((type) => (
@@ -217,13 +217,13 @@ const ErrorDashboard: React.FC<ErrorDashboardProps> = ({ className }) => {
         <div className="space-y-3 max-h-96 overflow-y-auto">
           {errors.length === 0 ? (
             <div className="text-center py-8">
-              <div className="text-gray-400 text-4xl mb-2">✅</div>
-              <p className="text-gray-600">
+              <div className="text-muted-foreground text-4xl mb-2">✅</div>
+              <p className="text-muted-foreground">
                 {filter === 'pending' ? 'No pending errors' : 'No errors found'}
               </p>
-              <p className="text-sm text-gray-500 mt-1">
-                {filter === 'pending' 
-                  ? 'All systems are running smoothly!' 
+              <p className="text-sm text-muted-foreground/70 mt-1">
+                {filter === 'pending'
+                  ? 'All systems are running smoothly!'
                   : 'Try adjusting your filters'
                 }
               </p>
@@ -233,7 +233,9 @@ const ErrorDashboard: React.FC<ErrorDashboardProps> = ({ className }) => {
               <div
                 key={error.id}
                 className={`p-4 border rounded-lg ${
-                  error.resolved ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'
+                  error.resolved
+                    ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'
+                    : 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'
                 }`}
               >
                 <div className="flex items-start justify-between">
@@ -248,20 +250,20 @@ const ErrorDashboard: React.FC<ErrorDashboardProps> = ({ className }) => {
                           {error.errorCode}
                         </Badge>
                       )}
-                      <span className="text-xs text-gray-500">
+                      <span className="text-xs text-muted-foreground">
                         {formatRelativeTime(error.timestamp)}
                       </span>
                     </div>
-                    
-                    <p className="text-sm font-medium text-gray-800 mb-1">
+
+                    <p className="text-sm font-medium text-card-foreground mb-1">
                       {error.message}
                     </p>
-                    
-                    <p className="text-xs text-gray-600 mb-2">
+
+                    <p className="text-xs text-muted-foreground mb-2">
                       Tweet: "{error.tweetContent}..."
                     </p>
-                    
-                    <p className="text-xs text-gray-500">
+
+                    <p className="text-xs text-muted-foreground/70">
                       {getRetryStatusText(error)}
                     </p>
                   </div>

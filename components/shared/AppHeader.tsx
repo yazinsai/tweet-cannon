@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import { ThemeToggle } from '@/components/ui/ThemeToggle';
 
 interface AppHeaderProps {
   title?: string;
@@ -32,6 +33,8 @@ export function AppHeader({
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
         <div className="flex items-center justify-end">
           <div className="flex items-center space-x-2">
+            {/* Theme Toggle */}
+            <ThemeToggle variant="button" />
             {/* Queue Indicator */}
             {currentPage === 'simple-dashboard' && onQueueClick && (
               <button

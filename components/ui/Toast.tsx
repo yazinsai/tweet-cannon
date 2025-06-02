@@ -58,32 +58,32 @@ const Toast: React.FC<ToastComponentProps> = ({
 
   const typeStyles = {
     success: {
-      bg: 'bg-emerald-50 border-emerald-200',
+      bg: 'bg-emerald-50 border-emerald-200 dark:bg-emerald-900/20 dark:border-emerald-800',
       icon: '✅',
-      iconColor: 'text-emerald-600',
-      titleColor: 'text-emerald-800',
-      messageColor: 'text-emerald-700',
+      iconColor: 'text-emerald-600 dark:text-emerald-400',
+      titleColor: 'text-emerald-800 dark:text-emerald-300',
+      messageColor: 'text-emerald-700 dark:text-emerald-400',
     },
     error: {
-      bg: 'bg-red-50 border-red-200',
+      bg: 'bg-red-50 border-red-200 dark:bg-red-900/20 dark:border-red-800',
       icon: '❌',
-      iconColor: 'text-red-600',
-      titleColor: 'text-red-800',
-      messageColor: 'text-red-700',
+      iconColor: 'text-red-600 dark:text-red-400',
+      titleColor: 'text-red-800 dark:text-red-300',
+      messageColor: 'text-red-700 dark:text-red-400',
     },
     warning: {
-      bg: 'bg-amber-50 border-amber-200',
+      bg: 'bg-amber-50 border-amber-200 dark:bg-amber-900/20 dark:border-amber-800',
       icon: '⚠️',
-      iconColor: 'text-amber-600',
-      titleColor: 'text-amber-800',
-      messageColor: 'text-amber-700',
+      iconColor: 'text-amber-600 dark:text-amber-400',
+      titleColor: 'text-amber-800 dark:text-amber-300',
+      messageColor: 'text-amber-700 dark:text-amber-400',
     },
     info: {
-      bg: 'bg-slate-50 border-slate-200',
+      bg: 'bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800',
       icon: 'ℹ️',
-      iconColor: 'text-slate-600',
-      titleColor: 'text-slate-800',
-      messageColor: 'text-slate-700',
+      iconColor: 'text-blue-600 dark:text-blue-400',
+      titleColor: 'text-blue-800 dark:text-blue-300',
+      messageColor: 'text-blue-700 dark:text-blue-400',
     },
   };
 

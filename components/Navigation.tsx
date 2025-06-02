@@ -26,14 +26,14 @@ const Navigation: React.FC<NavigationProps> = ({ className }) => {
   ];
 
   return (
-    <nav className={cn('bg-white border-b border-gray-200', className)}>
+    <nav className={cn('bg-card border-b border-border', className)}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           {/* Logo */}
           <div className="flex items-center">
             <Link href="/" className="flex items-center space-x-2">
               <span className="text-2xl">🚀</span>
-              <span className="text-xl font-bold text-gray-900">
+              <span className="text-xl font-bold text-card-foreground">
                 Tweet Cannon
               </span>
             </Link>

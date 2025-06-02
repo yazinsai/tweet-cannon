@@ -40,19 +40,19 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100">
+    <div className="min-h-screen bg-gradient-to-br from-background to-muted">
       {/* Hero Section */}
       <div className="relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-16">
           <div className="text-center">
             <div className="mb-8">
-              <div className="inline-flex items-center justify-center w-20 h-20 bg-slate-800 rounded-full mb-6">
+              <div className="inline-flex items-center justify-center w-20 h-20 bg-primary rounded-full mb-6">
                 <span className="text-3xl">🚀</span>
               </div>
-              <h1 className="text-5xl font-bold text-gray-900 mb-4">
+              <h1 className="text-5xl font-bold text-foreground mb-4">
                 Tweet Cannon
               </h1>
-              <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
                 Schedule and automate your Twitter posts with ease.
                 Set it up once, and let it handle the rest.
               </p>
@@ -78,7 +78,7 @@ export default function Home() {
               {isAuthenticated ? (
                 <Link
                   href="/simple-dashboard"
-                  className="inline-flex items-center px-8 py-4 bg-slate-800 text-white text-lg font-semibold rounded-xl hover:bg-slate-900 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200"
+                  className="inline-flex items-center px-8 py-4 bg-primary text-primary-foreground text-lg font-semibold rounded-xl hover:bg-primary/90 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200"
                 >
                   <span className="mr-2">📊</span>
                   Open Dashboard
@@ -86,7 +86,7 @@ export default function Home() {
               ) : (
                 <Link
                   href="/tweet"
-                  className="inline-flex items-center px-8 py-4 bg-blue-600 text-white text-lg font-semibold rounded-xl hover:bg-blue-700 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200"
+                  className="inline-flex items-center px-8 py-4 bg-blue-600 text-white text-lg font-semibold rounded-xl hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200"
                 >
                   <span className="mr-2">🚀</span>
                   Get Started

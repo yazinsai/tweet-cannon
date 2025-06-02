@@ -143,9 +143,9 @@ const ActivityFeed: React.FC<ActivityFeedProps> = ({
       <CardContent>
         {activities.length === 0 ? (
           <div className="text-center py-8">
-            <div className="text-gray-400 text-4xl mb-2">📋</div>
-            <p className="text-gray-600">No recent activity</p>
-            <p className="text-sm text-gray-500 mt-1">
+            <div className="text-muted-foreground text-4xl mb-2">📋</div>
+            <p className="text-muted-foreground">No recent activity</p>
+            <p className="text-sm text-muted-foreground/70 mt-1">
               Activity will appear here as you use Tweet Cannon
             </p>
           </div>
@@ -154,46 +154,46 @@ const ActivityFeed: React.FC<ActivityFeedProps> = ({
             {activities.map((activity) => (
               <div
                 key={activity.id}
-                className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                className="flex items-start space-x-3 p-3 bg-muted rounded-lg hover:bg-muted/80 transition-colors"
               >
                 <div className="flex-shrink-0 text-lg">
                   {getActivityIcon(activity.type)}
                 </div>
-                
+
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between">
-                    <p className="text-sm font-medium text-gray-900 truncate">
+                    <p className="text-sm font-medium text-card-foreground truncate">
                       {activity.title}
                     </p>
-                    <Badge 
-                      variant={getActivityColor(activity.type)} 
+                    <Badge
+                      variant={getActivityColor(activity.type)}
                       size="sm"
                       className="ml-2 flex-shrink-0"
                     >
                       {formatRelativeTime(activity.timestamp)}
                     </Badge>
                   </div>
-                  
-                  <p className="text-sm text-gray-600 mt-1">
+
+                  <p className="text-sm text-muted-foreground mt-1">
                     {activity.description}
                   </p>
                   
                   {/* Additional metadata */}
                   {activity.metadata?.tweetContent && (
-                    <div className="mt-2 p-2 bg-white rounded border text-xs text-gray-700">
+                    <div className="mt-2 p-2 bg-card rounded border border-border text-xs text-card-foreground">
                       "{activity.metadata.tweetContent.slice(0, 100)}
                       {activity.metadata.tweetContent.length > 100 ? '...' : ''}"
                     </div>
                   )}
-                  
+
                   {activity.metadata?.error && (
-                    <div className="mt-2 p-2 bg-red-50 rounded border border-red-200 text-xs text-red-700">
+                    <div className="mt-2 p-2 bg-red-50 dark:bg-red-900/20 rounded border border-red-200 dark:border-red-800 text-xs text-red-700 dark:text-red-400">
                       Error: {activity.metadata.error}
                     </div>
                   )}
-                  
+
                   {activity.metadata?.username && (
-                    <div className="mt-1 text-xs text-gray-500">
+                    <div className="mt-1 text-xs text-muted-foreground">
                       User: @{activity.metadata.username}
                     </div>
                   )}

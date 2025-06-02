@@ -154,11 +154,11 @@ const StatusMonitor: React.FC<StatusMonitorProps> = ({ className, compact = fals
           {systemHealth.label}
         </Badge>
         {status.scheduler.isRunning && status.scheduler.nextPostTime && (
-          <span className="text-xs text-gray-500">
+          <span className="text-xs text-muted-foreground">
             Next: {formatRelativeTime(status.scheduler.nextPostTime)}
           </span>
         )}
-        <span className="text-xs text-gray-400">
+        <span className="text-xs text-muted-foreground/70">
           Updated {formatRelativeTime(status.lastUpdate)}
         </span>
       </div>
@@ -188,10 +188,10 @@ const StatusMonitor: React.FC<StatusMonitorProps> = ({ className, compact = fals
       
       <CardContent className="space-y-4">
         {/* Connection Status */}
-        <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+        <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
           <div className="flex items-center space-x-2">
             <span className="text-lg">{isOnline ? '🌐' : '📡'}</span>
-            <span className="text-sm font-medium text-gray-700">
+            <span className="text-sm font-medium text-card-foreground">
               Connection
             </span>
           </div>
@@ -201,37 +201,37 @@ const StatusMonitor: React.FC<StatusMonitorProps> = ({ className, compact = fals
         </div>
 
         {/* Scheduler Status */}
-        <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+        <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
           <div className="flex items-center space-x-2">
             <span className="text-lg">🤖</span>
-            <span className="text-sm font-medium text-gray-700">
+            <span className="text-sm font-medium text-card-foreground">
               Scheduler
             </span>
           </div>
-          <Badge 
+          <Badge
             variant={
-              status.scheduler.isRunning && !status.scheduler.isPaused 
-                ? 'success' 
-                : status.scheduler.isPaused 
-                ? 'warning' 
+              status.scheduler.isRunning && !status.scheduler.isPaused
+                ? 'success'
+                : status.scheduler.isPaused
+                ? 'warning'
                 : 'default'
-            } 
+            }
             size="sm"
           >
-            {status.scheduler.isRunning && !status.scheduler.isPaused 
-              ? 'Running' 
-              : status.scheduler.isPaused 
-              ? 'Paused' 
+            {status.scheduler.isRunning && !status.scheduler.isPaused
+              ? 'Running'
+              : status.scheduler.isPaused
+              ? 'Paused'
               : 'Stopped'
             }
           </Badge>
         </div>
 
         {/* Authentication Status */}
-        <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+        <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
           <div className="flex items-center space-x-2">
             <span className="text-lg">🔐</span>
-            <span className="text-sm font-medium text-gray-700">
+            <span className="text-sm font-medium text-card-foreground">
               Authentication
             </span>
           </div>
@@ -241,11 +241,11 @@ const StatusMonitor: React.FC<StatusMonitorProps> = ({ className, compact = fals
         </div>
 
         {/* Queue Status */}
-        <div className="p-3 bg-gray-50 rounded-lg">
+        <div className="p-3 bg-muted rounded-lg">
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center space-x-2">
               <span className="text-lg">📝</span>
-              <span className="text-sm font-medium text-gray-700">
+              <span className="text-sm font-medium text-card-foreground">
                 Queue Status
               </span>
             </div>
@@ -256,29 +256,29 @@ const StatusMonitor: React.FC<StatusMonitorProps> = ({ className, compact = fals
           <div className="grid grid-cols-3 gap-2 text-xs">
             <div className="text-center">
               <div className="font-bold text-blue-600">{status.queue.queued}</div>
-              <div className="text-gray-500">Queued</div>
+              <div className="text-muted-foreground">Queued</div>
             </div>
             <div className="text-center">
               <div className="font-bold text-green-600">{status.queue.posted}</div>
-              <div className="text-gray-500">Posted</div>
+              <div className="text-muted-foreground">Posted</div>
             </div>
             <div className="text-center">
               <div className="font-bold text-red-600">{status.queue.failed}</div>
-              <div className="text-gray-500">Failed</div>
+              <div className="text-muted-foreground">Failed</div>
             </div>
           </div>
         </div>
 
         {/* Next Post Time */}
         {status.scheduler.nextPostTime && (
-          <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+          <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
             <div className="flex items-center space-x-2">
               <span className="text-lg">⏰</span>
               <div>
-                <p className="text-sm font-medium text-blue-800">
+                <p className="text-sm font-medium text-blue-800 dark:text-blue-300">
                   Next Post
                 </p>
-                <p className="text-xs text-blue-600">
+                <p className="text-xs text-blue-600 dark:text-blue-400">
                   {formatDate(status.scheduler.nextPostTime)}
                 </p>
               </div>
@@ -287,7 +287,7 @@ const StatusMonitor: React.FC<StatusMonitorProps> = ({ className, compact = fals
         )}
 
         {/* Last Update */}
-        <div className="text-center text-xs text-gray-500">
+        <div className="text-center text-xs text-muted-foreground">
           Last updated {formatRelativeTime(status.lastUpdate)}
         </div>
       </CardContent>

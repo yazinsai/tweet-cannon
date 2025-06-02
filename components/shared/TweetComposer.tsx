@@ -143,10 +143,10 @@ export function TweetComposer({
             onChange={(e) => setMessage(e.target.value)}
             placeholder={dragActive ? "Drop images here or continue typing..." : placeholder}
             className={cn(
-              "w-full p-4 border rounded-xl resize-none focus:ring-2 focus:ring-slate-500 focus:border-transparent transition-colors",
+              "w-full p-4 border rounded-xl resize-none bg-input text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:border-transparent transition-colors",
               dragActive
-                ? "border-slate-500 bg-slate-50"
-                : "border-gray-200",
+                ? "border-ring bg-accent"
+                : "border-border",
               isPosting && "opacity-50"
             )}
             rows={4}

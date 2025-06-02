@@ -162,7 +162,7 @@ const TweetQueue: React.FC<TweetQueueProps> = ({
         {/* Sort Options */}
         <div className="flex items-center justify-between mt-2">
           <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-600">Sort by:</span>
+            <span className="text-sm text-muted-foreground">Sort by:</span>
             <Button
               size="sm"
               variant={sortBy === 'created' ? 'primary' : 'ghost'}
@@ -222,14 +222,14 @@ const TweetQueue: React.FC<TweetQueueProps> = ({
 
         {filteredTweets.length === 0 ? (
           <div className="text-center py-8">
-            <div className="text-gray-400 text-4xl mb-2">📝</div>
-            <p className="text-gray-600">
+            <div className="text-muted-foreground text-4xl mb-2">📝</div>
+            <p className="text-muted-foreground">
               {filter === 'all'
                 ? 'No tweets in queue yet'
                 : `No ${filter} tweets`
               }
             </p>
-            <p className="text-sm text-gray-500 mt-1">
+            <p className="text-sm text-muted-foreground/70 mt-1">
               Add some tweets to get started!
             </p>
           </div>
@@ -251,7 +251,7 @@ const TweetQueue: React.FC<TweetQueueProps> = ({
                       type="checkbox"
                       checked={selectedTweets.includes(tweet.id)}
                       onChange={() => handleToggleSelection(tweet.id)}
-                      className="w-4 h-4 text-blue-600 bg-white border-gray-300 rounded focus:ring-blue-500"
+                      className="w-4 h-4 text-blue-600 bg-background border-border rounded focus:ring-blue-500"
                     />
                   </div>
                 )}

@@ -140,10 +140,10 @@ const TweetInput: React.FC<TweetInputProps> = ({ onTweetAdded, className, enable
   return (
     <Card className={className}>
       {showDraftIndicator && (
-        <div className="bg-blue-50 border-l-4 border-blue-400 p-3 mb-4">
+        <div className="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-400 dark:border-blue-600 p-3 mb-4">
           <div className="flex items-center">
-            <span className="text-blue-600 mr-2">💾</span>
-            <span className="text-blue-800 text-sm font-medium">Draft restored</span>
+            <span className="text-blue-600 dark:text-blue-400 mr-2">💾</span>
+            <span className="text-blue-800 dark:text-blue-300 text-sm font-medium">Draft restored</span>
           </div>
         </div>
       )}
@@ -178,18 +178,18 @@ const TweetInput: React.FC<TweetInputProps> = ({ onTweetAdded, className, enable
         </CardContent>
 
         <CardFooter className="flex justify-between items-center">
-          <div className="text-sm text-gray-500 space-y-1">
+          <div className="text-sm text-muted-foreground space-y-1">
             {images.length > 0 && (
               <div>📷 {images.length} image{images.length > 1 ? 's' : ''} attached</div>
             )}
             {charInfo.needsThreading && (
-              <div className="text-blue-600">🧵 Will be posted as thread</div>
+              <div className="text-blue-600 dark:text-blue-400">🧵 Will be posted as thread</div>
             )}
             {validation.warnings.length > 0 && (
-              <div className="text-amber-600">⚠️ {validation.warnings[0]}</div>
+              <div className="text-amber-600 dark:text-amber-400">⚠️ {validation.warnings[0]}</div>
             )}
             {(content.trim() || images.length > 0) && !isLoading && (
-              <div className="text-xs text-gray-400">💾 Auto-saving draft...</div>
+              <div className="text-xs text-muted-foreground/70">💾 Auto-saving draft...</div>
             )}
           </div>
 

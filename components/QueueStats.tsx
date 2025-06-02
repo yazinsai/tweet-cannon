@@ -50,7 +50,7 @@ const QueueStats: React.FC<QueueStatsProps> = ({ className, refreshTrigger }) =>
     return (
       <Card className={className}>
         <CardContent className="flex items-center justify-center py-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
         </CardContent>
       </Card>
     );
@@ -100,11 +100,11 @@ const QueueStats: React.FC<QueueStatsProps> = ({ className, refreshTrigger }) =>
           {statItems.map((item) => (
             <div
               key={item.label}
-              className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+              className="flex items-center justify-between p-3 bg-muted rounded-lg"
             >
               <div className="flex items-center space-x-2">
                 <span className="text-lg">{item.icon}</span>
-                <span className="text-sm font-medium text-gray-700">
+                <span className="text-sm font-medium text-card-foreground">
                   {item.label}
                 </span>
               </div>
@@ -117,14 +117,14 @@ const QueueStats: React.FC<QueueStatsProps> = ({ className, refreshTrigger }) =>
 
         {/* Next Post Time */}
         {stats.postingEnabled && stats.nextPostTime && (
-          <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+          <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
             <div className="flex items-center space-x-2">
               <span className="text-lg">⏰</span>
               <div>
-                <p className="text-sm font-medium text-blue-800">
+                <p className="text-sm font-medium text-blue-800 dark:text-blue-300">
                   Next Scheduled Post
                 </p>
-                <p className="text-xs text-blue-600">
+                <p className="text-xs text-blue-600 dark:text-blue-400">
                   {formatDate(stats.nextPostTime)}
                 </p>
               </div>
@@ -133,18 +133,18 @@ const QueueStats: React.FC<QueueStatsProps> = ({ className, refreshTrigger }) =>
         )}
 
         {/* Quick Actions */}
-        <div className="pt-2 border-t border-gray-200">
-          <div className="flex justify-between text-xs text-gray-500">
+        <div className="pt-2 border-t border-border">
+          <div className="flex justify-between text-xs text-muted-foreground">
             <span>
               Success Rate: {
-                stats.totalTweets > 0 
+                stats.totalTweets > 0
                   ? Math.round((stats.postedTweets / stats.totalTweets) * 100)
                   : 0
               }%
             </span>
             <span>
               Queue Health: {
-                stats.failedTweets === 0 
+                stats.failedTweets === 0
                   ? '🟢 Good'
                   : stats.failedTweets < 3
                   ? '🟡 Fair'

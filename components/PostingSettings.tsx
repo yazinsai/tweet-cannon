@@ -111,10 +111,10 @@ const PostingSettings: React.FC<PostingSettingsProps> = ({
 
       <CardContent className="space-y-6">
         {/* Enable/Disable Toggle */}
-        <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+        <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
           <div>
-            <h3 className="font-medium text-gray-900">Auto-posting</h3>
-            <p className="text-sm text-gray-600">
+            <h3 className="font-medium text-card-foreground">Auto-posting</h3>
+            <p className="text-sm text-muted-foreground">
               Automatically post tweets from your queue
             </p>
           </div>
@@ -128,7 +128,7 @@ const PostingSettings: React.FC<PostingSettingsProps> = ({
 
         {/* Cadence Selection */}
         <div className="space-y-3">
-          <label className="block text-sm font-medium text-gray-700">
+          <label className="block text-sm font-medium text-card-foreground">
             Posting Frequency
           </label>
           <div className="grid grid-cols-3 gap-2">
@@ -178,11 +178,11 @@ const PostingSettings: React.FC<PostingSettingsProps> = ({
 
         {/* Next Post Preview */}
         {config.enabled && (
-          <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
-            <h4 className="text-sm font-medium text-blue-800 mb-1">
+          <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+            <h4 className="text-sm font-medium text-blue-800 dark:text-blue-300 mb-1">
               Next Post Preview
             </h4>
-            <p className="text-xs text-blue-600">
+            <p className="text-xs text-blue-600 dark:text-blue-400">
               Posts will occur every {config.interval} hour{config.interval !== 1 ? 's' : ''}
               {config.randomWindow > 0 && ` (±${config.randomWindow} minutes)`}
             </p>
@@ -191,14 +191,14 @@ const PostingSettings: React.FC<PostingSettingsProps> = ({
 
         {/* Error/Success Messages */}
         {error && (
-          <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
-            <p className="text-sm text-red-600">{error}</p>
+          <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+            <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
           </div>
         )}
 
         {successMessage && (
-          <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
-            <p className="text-sm text-green-600">{successMessage}</p>
+          <div className="p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+            <p className="text-sm text-green-600 dark:text-green-400">{successMessage}</p>
           </div>
         )}
 

@@ -88,7 +88,7 @@ const DashboardPage: React.FC = () => {
 
   return (
     <AuthGuard>
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100">
+      <div className="min-h-screen bg-gradient-to-br from-background to-muted">
         <AppHeader
           title="Advanced Dashboard"
           subtitle="Detailed automation controls"
@@ -97,7 +97,7 @@ const DashboardPage: React.FC = () => {
         />
 
         {/* Additional Controls */}
-        <div className="bg-white border-b border-gray-200">
+        <div className="bg-card border-b border-border">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
             <div className="flex items-center justify-between">
               <StatusMonitor compact />
@@ -113,7 +113,7 @@ const DashboardPage: React.FC = () => {
 
         {/* Tab Navigation */}
         <div className="mb-8">
-          <div className="bg-white rounded-2xl shadow-lg p-2">
+          <div className="bg-card rounded-2xl shadow-lg p-2 border border-border">
             <nav className="flex space-x-2">
               {tabs.map((tab) => (
                 <button
@@ -121,8 +121,8 @@ const DashboardPage: React.FC = () => {
                   onClick={() => setActiveTab(tab.id)}
                   className={`flex-1 py-3 px-4 rounded-xl font-medium text-sm flex items-center justify-center space-x-2 transition-colors ${
                     activeTab === tab.id
-                      ? 'bg-slate-800 text-white shadow-md'
-                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                      ? 'bg-primary text-primary-foreground shadow-md'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-accent'
                   }`}
                 >
                   <span>{tab.icon}</span>
@@ -138,14 +138,14 @@ const DashboardPage: React.FC = () => {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Tweet Input */}
             <div className="lg:col-span-1">
-              <div className="bg-white rounded-2xl shadow-lg p-6">
+              <div className="bg-card rounded-2xl shadow-lg p-6 border border-border">
                 <TweetInput onTweetAdded={handleTweetAdded} location="dashboard" />
               </div>
             </div>
 
             {/* Tweet Queue */}
             <div className="lg:col-span-2">
-              <div className="bg-white rounded-2xl shadow-lg p-6">
+              <div className="bg-card rounded-2xl shadow-lg p-6 border border-border">
                 <TweetQueue
                   tweets={tweets}
                   onTweetUpdated={handleTweetUpdated}
@@ -159,7 +159,7 @@ const DashboardPage: React.FC = () => {
         {activeTab === 'scheduler' && (
           <div className="space-y-8">
             {/* Scheduler Controls */}
-            <div className="bg-white rounded-2xl shadow-lg p-6">
+            <div className="bg-card rounded-2xl shadow-lg p-6 border border-border">
               <SchedulerControls
                 config={config || { enabled: false, cadence: 'daily', interval: 24, randomWindow: 30 }}
                 session={session}
@@ -169,8 +169,8 @@ const DashboardPage: React.FC = () => {
             </div>
 
             {/* How It Works */}
-            <div className="bg-white rounded-2xl shadow-lg p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+            <div className="bg-card rounded-2xl shadow-lg p-6 border border-border">
+              <h3 className="text-lg font-semibold text-card-foreground mb-4 flex items-center">
                 <span className="mr-2">💡</span>
                 How Automation Works
               </h3>
@@ -178,44 +178,44 @@ const DashboardPage: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-4">
                   <div className="flex items-start">
-                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3 mt-0.5">
+                    <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/20 rounded-full flex items-center justify-center mr-3 mt-0.5">
                       <span className="text-sm">🤖</span>
                     </div>
                     <div>
-                      <h4 className="font-medium text-gray-900">Smart Scheduling</h4>
-                      <p className="text-sm text-gray-600">Automatically posts tweets from your queue at optimal times</p>
+                      <h4 className="font-medium text-card-foreground">Smart Scheduling</h4>
+                      <p className="text-sm text-muted-foreground">Automatically posts tweets from your queue at optimal times</p>
                     </div>
                   </div>
 
                   <div className="flex items-start">
-                    <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5">
+                    <div className="w-8 h-8 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center mr-3 mt-0.5">
                       <span className="text-sm">🎲</span>
                     </div>
                     <div>
-                      <h4 className="font-medium text-gray-900">Natural Timing</h4>
-                      <p className="text-sm text-gray-600">Adds randomization to appear more human-like</p>
+                      <h4 className="font-medium text-card-foreground">Natural Timing</h4>
+                      <p className="text-sm text-muted-foreground">Adds randomization to appear more human-like</p>
                     </div>
                   </div>
                 </div>
 
                 <div className="space-y-4">
                   <div className="flex items-start">
-                    <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center mr-3 mt-0.5">
+                    <div className="w-8 h-8 bg-purple-100 dark:bg-purple-900/20 rounded-full flex items-center justify-center mr-3 mt-0.5">
                       <span className="text-sm">⚡</span>
                     </div>
                     <div>
-                      <h4 className="font-medium text-gray-900">Background Operation</h4>
-                      <p className="text-sm text-gray-600">Continues working even when you close the browser</p>
+                      <h4 className="font-medium text-card-foreground">Background Operation</h4>
+                      <p className="text-sm text-muted-foreground">Continues working even when you close the browser</p>
                     </div>
                   </div>
 
                   <div className="flex items-start">
-                    <div className="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center mr-3 mt-0.5">
+                    <div className="w-8 h-8 bg-yellow-100 dark:bg-yellow-900/20 rounded-full flex items-center justify-center mr-3 mt-0.5">
                       <span className="text-sm">📊</span>
                     </div>
                     <div>
-                      <h4 className="font-medium text-gray-900">Real-time Updates</h4>
-                      <p className="text-sm text-gray-600">Get instant feedback on posting status</p>
+                      <h4 className="font-medium text-card-foreground">Real-time Updates</h4>
+                      <p className="text-sm text-muted-foreground">Get instant feedback on posting status</p>
                     </div>
                   </div>
                 </div>
@@ -228,11 +228,11 @@ const DashboardPage: React.FC = () => {
           <div className="space-y-8">
             {/* Main Settings */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <div className="bg-white rounded-2xl shadow-lg p-6">
+              <div className="bg-card rounded-2xl shadow-lg p-6 border border-border">
                 <AuthSettings onAuthUpdated={handleAuthUpdated} />
               </div>
 
-              <div className="bg-white rounded-2xl shadow-lg p-6">
+              <div className="bg-card rounded-2xl shadow-lg p-6 border border-border">
                 <PostingSettings onConfigUpdated={handleConfigUpdated} />
               </div>
             </div>
@@ -240,8 +240,8 @@ const DashboardPage: React.FC = () => {
             {/* Advanced Settings */}
             {showAdvanced && (
               <div className="space-y-8">
-                <div className="bg-white rounded-2xl shadow-lg p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                <div className="bg-card rounded-2xl shadow-lg p-6 border border-border">
+                  <h3 className="text-lg font-semibold text-card-foreground mb-4 flex items-center">
                     <span className="mr-2">🔧</span>
                     Advanced Features
                   </h3>
@@ -257,10 +257,10 @@ const DashboardPage: React.FC = () => {
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                  <div className="bg-white rounded-2xl shadow-lg p-6">
+                  <div className="bg-card rounded-2xl shadow-lg p-6 border border-border">
                     <ErrorDashboard />
                   </div>
-                  <div className="bg-white rounded-2xl shadow-lg p-6">
+                  <div className="bg-card rounded-2xl shadow-lg p-6 border border-border">
                     <RetrySettings />
                   </div>
                 </div>
