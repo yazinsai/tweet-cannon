@@ -36,6 +36,16 @@ export interface MediaUploadResponse {
     w: number;
     h: number;
   };
+  processing_info?: {
+    state: 'pending' | 'in_progress' | 'succeeded' | 'failed';
+    check_after_secs?: number;
+    progress_percent?: number;
+    error?: {
+      code: number;
+      name: string;
+      message: string;
+    };
+  };
 }
 
 export interface PostingConfig {

@@ -109,13 +109,13 @@ async function initMediaUpload(
       command: 'INIT',
       total_bytes: file.size.toString(),
       media_type: file.type,
-      enable_1080p_variant: 'true',
       media_category: 'tweet_image'
     });
 
-    const response = await fetch(`https://upload.x.com/i/media/upload.json?${params}`, {
+    const response = await fetch('https://upload.x.com/i/media/upload.json', {
       method: 'POST',
-      headers
+      headers,
+      body: params
     });
 
     if (!response.ok) {
@@ -187,6 +187,51 @@ async function appendMediaData(
 }
 
 /**
+ * Step 3: Check media upload status
+ */
+async function checkMediaStatus(
+  mediaId: string,
+  cookies: string
+): Promise<{ success: boolean; mediaData?: MediaUploadResponse; error?: string }> {
+  try {
+    const headers = createMediaUploadHeaders(cookies);
+    // STATUS is a GET, so no body/content-type needed
+    delete headers['content-type'];
+
+    const params = new URLSearchParams({
+      command: 'STATUS',
+      media_id: mediaId,
+    });
+
+    const response = await fetch(`https://upload.x.com/i/media/upload.json?${params}`, {
+      method: 'GET', // STATUS is a GET request
+      headers,
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Media upload STATUS failed:', errorText);
+      return {
+        success: false,
+        error: `Failed to check upload status: ${response.status}`,
+      };
+    }
+
+    const result: MediaUploadResponse = await response.json();
+    return {
+      success: true,
+      mediaData: result,
+    };
+  } catch (error) {
+    console.error('Media upload STATUS error:', error);
+    return {
+      success: false,
+      error: 'Network error during upload status check',
+    };
+  }
+}
+
+/**
  * Step 3: Finalize media upload
  */
 async function finalizeMediaUpload(
@@ -206,9 +251,10 @@ async function finalizeMediaUpload(
       params.append('original_md5', originalMd5);
     }
 
-    const response = await fetch(`https://upload.x.com/i/media/upload.json?${params}`, {
+    const response = await fetch('https://upload.x.com/i/media/upload.json', {
       method: 'POST',
-      headers
+      headers,
+      body: params,
     });
 
     if (!response.ok) {
@@ -220,7 +266,49 @@ async function finalizeMediaUpload(
       };
     }
 
-    const result: MediaUploadResponse = await response.json();
+    let result: MediaUploadResponse = await response.json();
+    
+    // Wait for Twitter to finish processing the media
+    if (result.processing_info) {
+      let state: 'pending' | 'in_progress' | 'succeeded' | 'failed' = result.processing_info.state;
+      let checkAfterSecs: number | undefined = result.processing_info.check_after_secs;
+      let attempts = 0;
+      const maxAttempts = 10; // Try for up to ~30 seconds
+
+      while ((state === 'pending' || state === 'in_progress') && attempts < maxAttempts) {
+        attempts++;
+        if (checkAfterSecs) {
+          await new Promise(resolve => setTimeout(resolve, checkAfterSecs * 1000));
+        } else {
+          // Default to 1 second if not provided
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+
+        const statusResult = await checkMediaStatus(mediaId, cookies);
+        if (!statusResult.success || !statusResult.mediaData) {
+          return { success: false, error: statusResult.error || 'Failed to get media status' };
+        }
+
+        result = statusResult.mediaData;
+        state = result.processing_info?.state ?? 'failed';
+        checkAfterSecs = result.processing_info?.check_after_secs;
+
+        if (state === 'failed') {
+          return {
+            success: false,
+            error: result.processing_info?.error?.message || 'Media processing failed'
+          };
+        }
+      }
+
+      if (state !== 'succeeded') {
+        return {
+          success: false,
+          error: `Media processing did not succeed. Final state: ${state}`
+        };
+      }
+    }
+
     return {
       success: true,
       mediaData: result
