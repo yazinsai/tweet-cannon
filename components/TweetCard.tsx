@@ -81,7 +81,7 @@ const TweetCard: React.FC<TweetCardProps> = ({
       });
       onTweetUpdated?.(updatedTweet);
 
-      let mediaIds: string[] = [];
+      const mediaIds: string[] = [];
 
       // Upload media if present
       if (tweet.media && tweet.media.length > 0) {
@@ -317,6 +317,7 @@ const TweetCard: React.FC<TweetCardProps> = ({
                         key={media.id}
                         className="relative aspect-square border border-border rounded-lg overflow-hidden bg-muted"
                       >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
                           src={media.preview}
                           alt="Tweet attachment"

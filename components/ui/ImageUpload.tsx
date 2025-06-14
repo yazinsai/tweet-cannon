@@ -244,10 +244,12 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
               </button>
 
               {/* File Info */}
-              <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-2 text-xs">
-                <div className="truncate">{image.file.name}</div>
-                <div>{(image.file.size / 1024).toFixed(1)} KB</div>
-              </div>
+              {image.file && (
+                <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-2 text-xs">
+                  <div className="truncate">{image.file.name}</div>
+                  <div>{(image.file.size / 1024).toFixed(1)} KB</div>
+                </div>
+              )}
             </div>
           ))}
         </div>

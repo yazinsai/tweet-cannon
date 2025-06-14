@@ -36,7 +36,7 @@ const DashboardPage: React.FC = () => {
     if (refreshTrigger > 0) {
       refreshAll();
     }
-  }, [refreshTrigger]); // Don't include refreshAll to avoid circular updates
+  }, [refreshTrigger, refreshAll]);
 
   const handleTweetAdded = () => {
     setRefreshTrigger(prev => prev + 1);

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -39,7 +39,14 @@ const ActivityFeed: React.FC<ActivityFeedProps> = ({
     if (savedActivities) {
       try {
         const parsed = JSON.parse(savedActivities);
-        const activitiesWithDates = parsed.map((activity: any) => ({
+        const activitiesWithDates = parsed.map((activity: {
+          id: string;
+          type: ActivityItem['type'];
+          title: string;
+          description: string;
+          timestamp: string;
+          metadata?: ActivityItem['metadata'];
+        }) => ({
           ...activity,
           timestamp: new Date(activity.timestamp),
         }));
@@ -55,7 +62,7 @@ const ActivityFeed: React.FC<ActivityFeedProps> = ({
     localStorage.setItem('tweet_cannon_activities', JSON.stringify(activities));
   }, [activities]);
 
-  const addActivity = (activity: Omit<ActivityItem, 'id' | 'timestamp'>) => {
+  const addActivity = useCallback((activity: Omit<ActivityItem, 'id' | 'timestamp'>) => {
     const newActivity: ActivityItem = {
       ...activity,
       id: `activity_${Date.now()}_${Math.random().toString(36).substring(2)}`,
@@ -66,7 +73,7 @@ const ActivityFeed: React.FC<ActivityFeedProps> = ({
       const updated = [newActivity, ...prev];
       return updated.slice(0, maxItems); // Keep only the most recent items
     });
-  };
+  }, [maxItems]);
 
   const clearActivities = () => {
     setActivities([]);
@@ -74,11 +81,11 @@ const ActivityFeed: React.FC<ActivityFeedProps> = ({
 
   // Expose addActivity function globally for other components to use
   useEffect(() => {
-    (window as any).addActivity = addActivity;
+    (window as Window & { addActivity?: typeof addActivity }).addActivity = addActivity;
     return () => {
-      delete (window as any).addActivity;
+      delete (window as Window & { addActivity?: typeof addActivity }).addActivity;
     };
-  }, []);
+  }, [addActivity]);
 
   const getActivityIcon = (type: ActivityItem['type']) => {
     switch (type) {
@@ -181,8 +188,8 @@ const ActivityFeed: React.FC<ActivityFeedProps> = ({
                   {/* Additional metadata */}
                   {activity.metadata?.tweetContent && (
                     <div className="mt-2 p-2 bg-card rounded border border-border text-xs text-card-foreground">
-                      "{activity.metadata.tweetContent.slice(0, 100)}
-                      {activity.metadata.tweetContent.length > 100 ? '...' : ''}"
+                      &quot;{activity.metadata.tweetContent.slice(0, 100)}
+                      {activity.metadata.tweetContent.length > 100 ? '...' : ''}&quot;
                     </div>
                   )}
 
@@ -208,9 +215,12 @@ const ActivityFeed: React.FC<ActivityFeedProps> = ({
 };
 
 // Helper functions for adding activities
+type WindowWithAddActivity = Window & { addActivity?: (activity: Omit<ActivityItem, 'id' | 'timestamp'>) => void };
+
 export const addTweetPostedActivity = (tweetContent: string, tweetId: string) => {
-  if ((window as any).addActivity) {
-    (window as any).addActivity({
+  const windowWithActivity = window as WindowWithAddActivity;
+  if (windowWithActivity.addActivity) {
+    windowWithActivity.addActivity({
       type: 'tweet_posted',
       title: 'Tweet Posted Successfully',
       description: 'Automated scheduler posted a tweet',
@@ -220,8 +230,9 @@ export const addTweetPostedActivity = (tweetContent: string, tweetId: string) =>
 };
 
 export const addTweetFailedActivity = (tweetContent: string, error: string, tweetId: string) => {
-  if ((window as any).addActivity) {
-    (window as any).addActivity({
+  const windowWithActivity = window as WindowWithAddActivity;
+  if (windowWithActivity.addActivity) {
+    windowWithActivity.addActivity({
       type: 'tweet_failed',
       title: 'Tweet Failed to Post',
       description: 'Automated scheduler failed to post a tweet',
@@ -231,8 +242,9 @@ export const addTweetFailedActivity = (tweetContent: string, error: string, twee
 };
 
 export const addSchedulerStartedActivity = () => {
-  if ((window as any).addActivity) {
-    (window as any).addActivity({
+  const windowWithActivity = window as WindowWithAddActivity;
+  if (windowWithActivity.addActivity) {
+    windowWithActivity.addActivity({
       type: 'scheduler_started',
       title: 'Scheduler Started',
       description: 'Automated posting scheduler has been started',
@@ -241,8 +253,9 @@ export const addSchedulerStartedActivity = () => {
 };
 
 export const addSchedulerStoppedActivity = () => {
-  if ((window as any).addActivity) {
-    (window as any).addActivity({
+  const windowWithActivity = window as WindowWithAddActivity;
+  if (windowWithActivity.addActivity) {
+    windowWithActivity.addActivity({
       type: 'scheduler_stopped',
       title: 'Scheduler Stopped',
       description: 'Automated posting scheduler has been stopped',
@@ -251,8 +264,9 @@ export const addSchedulerStoppedActivity = () => {
 };
 
 export const addTweetAddedActivity = (tweetContent: string) => {
-  if ((window as any).addActivity) {
-    (window as any).addActivity({
+  const windowWithActivity = window as WindowWithAddActivity;
+  if (windowWithActivity.addActivity) {
+    windowWithActivity.addActivity({
       type: 'tweet_added',
       title: 'Tweet Added to Queue',
       description: 'New tweet added to the posting queue',
@@ -262,8 +276,9 @@ export const addTweetAddedActivity = (tweetContent: string) => {
 };
 
 export const addAuthUpdatedActivity = (username?: string) => {
-  if ((window as any).addActivity) {
-    (window as any).addActivity({
+  const windowWithActivity = window as WindowWithAddActivity;
+  if (windowWithActivity.addActivity) {
+    windowWithActivity.addActivity({
       type: 'auth_updated',
       title: 'Authentication Updated',
       description: 'Twitter authentication credentials have been updated',
