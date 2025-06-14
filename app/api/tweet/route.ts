@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { splitTextIntoThread, validateThread, ThreadPostResult } from '@/utils/tweetThreading';
+import { splitTextIntoThread, validateThread } from '@/utils/tweetThreading';
 
 export async function POST(request: NextRequest) {
   try {
@@ -100,16 +100,7 @@ export async function POST(request: NextRequest) {
       ? mediaIds.map((mediaId: string) => ({ media_id: mediaId, tagged_users: [] }))
       : [];
 
-    // Prepare tweet data
-    const tweetData = {
-      text: message || '',
-      media: {
-        media_entities: mediaEntities,
-        possibly_sensitive: false
-      }
-    };
-
-    console.log('Sending tweet to Twitter API...');
+    console.log('Sending tweet to Twitter API with media:', mediaEntities);
 
     // Post tweet to Twitter using the correct endpoint and format
     const response = await fetch('https://x.com/i/api/graphql/eX0PqfsNKJZ1jAgyP_rHjQ/CreateTweet', {
@@ -193,7 +184,7 @@ export async function POST(request: NextRequest) {
               errorCode = twitterError.code?.toString() || errorCode;
             }
           }
-        } catch (parseError) {
+        } catch {
           // If parsing fails, use the original error
         }
       } else if (response.status >= 500) {
@@ -342,8 +333,10 @@ async function handleTweetThread(
         ? mediaIds.map((mediaId: string) => ({ media_id: mediaId, tagged_users: [] }))
         : [];
 
+      console.log(`Thread part ${i + 1}: isFirstTweet=${isFirstTweet}, mediaIds=${JSON.stringify(mediaIds)}, mediaEntities=${JSON.stringify(mediaEntities)}`);
+
       // Prepare tweet variables
-      const variables: any = {
+      const variables: Record<string, unknown> = {
         tweet_text: part,
         dark_request: false,
         media: {
