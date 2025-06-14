@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
 import { TweetInput } from '@/components/TweetInput';
 import { TweetQueue } from '@/components/TweetQueue';
 import { QueueStats } from '@/components/QueueStats';
@@ -15,22 +14,19 @@ import { RetrySettings } from '@/components/RetrySettings';
 
 import { AuthGuard } from '@/components/shared/AuthGuard';
 import { AppHeader } from '@/components/shared/AppHeader';
-import { Tweet, PostingConfig, UserSession } from '@/lib/types';
+import { PostingConfig } from '@/lib/types';
 import { useAppData } from '@/hooks/useAppData';
 
 const DashboardPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'queue' | 'scheduler' | 'settings'>('queue');
   const [refreshTrigger, setRefreshTrigger] = useState(0);
-  const [showAdvanced, setShowAdvanced] = useState(false);
+  const [showAdvanced] = useState(false);
 
   const {
     isLoading,
     tweets,
     session,
     config,
-    addNewTweet,
-    updateExistingTweet,
-    removeExistingTweet,
     updateConfig,
     refreshAll,
   } = useAppData();
@@ -38,20 +34,19 @@ const DashboardPage: React.FC = () => {
   // Refresh data when refreshTrigger changes
   useEffect(() => {
     if (refreshTrigger > 0) {
-      // Call refreshAll but don't include it in dependencies to avoid circular updates
       refreshAll();
     }
-  }, [refreshTrigger]); // Only depend on refreshTrigger, not refreshAll
+  }, [refreshTrigger]); // Don't include refreshAll to avoid circular updates
 
-  const handleTweetAdded = (newTweet: Tweet) => {
+  const handleTweetAdded = () => {
     setRefreshTrigger(prev => prev + 1);
   };
 
-  const handleTweetUpdated = (updatedTweet: Tweet) => {
+  const handleTweetUpdated = () => {
     setRefreshTrigger(prev => prev + 1);
   };
 
-  const handleTweetDeleted = (tweetId: string) => {
+  const handleTweetDeleted = () => {
     setRefreshTrigger(prev => prev + 1);
   };
 
@@ -60,7 +55,7 @@ const DashboardPage: React.FC = () => {
     setRefreshTrigger(prev => prev + 1);
   };
 
-  const handleAuthUpdated = (newSession: UserSession | null) => {
+  const handleAuthUpdated = () => {
     setRefreshTrigger(prev => prev + 1);
   };
 

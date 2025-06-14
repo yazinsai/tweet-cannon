@@ -51,6 +51,20 @@ const TweetCard: React.FC<TweetCardProps> = ({
   const handlePostNow = async () => {
     setIsPosting(true);
     try {
+      console.log('🚀 [TweetCard] Starting post process for tweet:', {
+        id: tweet.id,
+        content: tweet.content.substring(0, 50) + '...',
+        hasMedia: !!tweet.media,
+        mediaCount: tweet.media?.length || 0,
+        media: tweet.media?.map(m => ({ 
+          id: m.id, 
+          uploadStatus: m.uploadStatus, 
+          hasFile: !!m.file, 
+          mediaId: m.mediaId,
+          fileName: m.file?.name 
+        })) || []
+      });
+
       // Get saved cookies from encrypted session storage
       const { getUserSession } = await import('@/lib/storage');
       const session = await getUserSession();
@@ -71,11 +85,14 @@ const TweetCard: React.FC<TweetCardProps> = ({
 
       // Upload media if present
       if (tweet.media && tweet.media.length > 0) {
-        console.log('Uploading media for tweet:', tweet.media.length, 'files');
+        console.log('🖼️ Starting media upload for tweet:', tweet.media.length, 'files');
+        console.log('📝 Media objects:', tweet.media.map(m => ({ id: m.id, uploadStatus: m.uploadStatus, hasFile: !!m.file, mediaId: m.mediaId })));
 
         for (const media of tweet.media) {
           if (media.uploadStatus !== 'uploaded' && media.file) {
             try {
+              console.log(`⬆️ Uploading file: ${media.file.name} (${media.file.size} bytes, ${media.file.type})`);
+              
               const formData = new FormData();
               formData.append('file', media.file);
               formData.append('cookies', session.cookies);
@@ -86,15 +103,17 @@ const TweetCard: React.FC<TweetCardProps> = ({
               });
 
               const uploadData = await uploadResponse.json();
+              console.log('📥 Upload response:', { status: uploadResponse.status, data: uploadData });
 
               if (uploadResponse.ok && uploadData.mediaId) {
                 mediaIds.push(uploadData.mediaId);
-                console.log('Media uploaded successfully:', uploadData.mediaId);
+                console.log('✅ Media uploaded successfully:', uploadData.mediaId);
               } else {
+                console.error('❌ Upload failed with response:', uploadData);
                 throw new Error(uploadData.error || 'Failed to upload media');
               }
             } catch (uploadError) {
-              console.error('Media upload failed:', uploadError);
+              console.error('💥 Media upload failed:', uploadError);
               const failedTweet = updateTweet({
                 id: tweet.id,
                 status: 'failed',
@@ -105,10 +124,13 @@ const TweetCard: React.FC<TweetCardProps> = ({
             }
           } else if (media.mediaId) {
             // Use existing media ID
+            console.log('🔄 Using existing media ID:', media.mediaId);
             mediaIds.push(media.mediaId);
           }
         }
       }
+      
+      console.log('📋 Final mediaIds array:', mediaIds);
 
       // Post to Twitter API
       const response = await fetch('/api/tweet', {

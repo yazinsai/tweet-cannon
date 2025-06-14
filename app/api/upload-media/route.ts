@@ -21,20 +21,31 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log('Uploading media:', file.name, file.size, file.type);
+    console.log('📤 [upload-media] Starting upload:', {
+      name: file.name,
+      size: file.size,
+      type: file.type,
+      hasCookies: !!cookies
+    });
 
     // Upload to Twitter
     const result = await uploadImageToTwitter(file, cookies);
 
+    console.log('📤 [upload-media] Upload result:', {
+      success: result.success,
+      mediaId: result.mediaId,
+      error: result.error
+    });
+
     if (!result.success) {
-      console.error('Media upload failed:', result.error);
+      console.error('❌ [upload-media] Media upload failed:', result.error);
       return NextResponse.json(
         { error: result.error || 'Failed to upload media' },
         { status: 500 }
       );
     }
 
-    console.log('Media uploaded successfully:', result.mediaId);
+    console.log('✅ [upload-media] Media uploaded successfully:', result.mediaId);
 
     return NextResponse.json({
       success: true,

@@ -16,6 +16,18 @@ export function useTweetPosting(): UseTweetPostingReturn {
     setIsPosting(true);
 
     try {
+      console.log('🚀 [useTweetPosting] Starting post with:', {
+        messageLength: message.length,
+        imagesCount: images.length,
+        images: images.map(img => ({
+          id: img.id,
+          uploadStatus: img.uploadStatus,
+          hasFile: !!img.file,
+          fileName: img.file?.name,
+          mediaId: img.mediaId
+        }))
+      });
+
       // Get saved session from encrypted storage
       const session = await getUserSession();
 
@@ -27,10 +39,20 @@ export function useTweetPosting(): UseTweetPostingReturn {
 
       // Upload media if present
       if (images.length > 0) {
-        console.log('Uploading media for tweet:', images.length, 'files');
+        console.log('🖼️ [useTweetPosting] Uploading media for tweet:', images.length, 'files');
 
         for (const media of images) {
+          console.log(`🔍 [useTweetPosting] Processing media:`, {
+            id: media.id,
+            uploadStatus: media.uploadStatus,
+            hasFile: !!media.file,
+            fileName: media.file?.name,
+            mediaId: media.mediaId
+          });
+
           if (media.uploadStatus !== 'uploaded' && media.file) {
+            console.log(`⬆️ [useTweetPosting] Uploading file: ${media.file.name}`);
+            
             // Upload new media using FormData (files can't be JSON serialized)
             const formData = new FormData();
             formData.append('file', media.file);
@@ -41,24 +63,32 @@ export function useTweetPosting(): UseTweetPostingReturn {
               body: formData, // Don't set Content-Type header, let browser set multipart boundary
             });
 
+            console.log(`📥 [useTweetPosting] Upload response status:`, uploadResponse.status);
+
             if (!uploadResponse.ok) {
               const uploadError = await uploadResponse.json();
+              console.error(`❌ [useTweetPosting] Upload failed:`, uploadError);
               throw new Error(`Media upload failed: ${uploadError.error}`);
             }
 
             const uploadData = await uploadResponse.json();
+            console.log(`📤 [useTweetPosting] Upload data:`, uploadData);
+            
             if (uploadData.mediaId) {
               mediaIds.push(uploadData.mediaId);
-              console.log('Media uploaded successfully:', uploadData.mediaId);
+              console.log('✅ [useTweetPosting] Media uploaded successfully:', uploadData.mediaId);
             } else {
               throw new Error('No media ID returned from upload');
             }
           } else if (media.mediaId) {
             // Use existing media ID
+            console.log(`🔄 [useTweetPosting] Using existing media ID:`, media.mediaId);
             mediaIds.push(media.mediaId);
           }
         }
       }
+
+      console.log('📋 [useTweetPosting] Final mediaIds:', mediaIds);
 
       const response = await fetch('/api/tweet', {
         method: 'POST',

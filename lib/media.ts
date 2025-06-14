@@ -277,12 +277,8 @@ async function finalizeMediaUpload(
 
       while ((state === 'pending' || state === 'in_progress') && attempts < maxAttempts) {
         attempts++;
-        if (checkAfterSecs) {
-          await new Promise(resolve => setTimeout(resolve, checkAfterSecs * 1000));
-        } else {
-          // Default to 1 second if not provided
-          await new Promise(resolve => setTimeout(resolve, 1000));
-        }
+        const waitTime = checkAfterSecs !== undefined ? checkAfterSecs * 1000 : 1000;
+        await new Promise(resolve => setTimeout(resolve, waitTime));
 
         const statusResult = await checkMediaStatus(mediaId, cookies);
         if (!statusResult.success || !statusResult.mediaData) {
@@ -330,19 +326,26 @@ export async function uploadImageToTwitter(
   cookies: string,
   onProgress?: (progress: number) => void
 ): Promise<{ success: boolean; mediaId?: string; mediaData?: MediaUploadResponse; error?: string }> {
+  console.log('🔄 [uploadImageToTwitter] Starting 3-step upload process for:', file.name);
+  
   // Validate file
   const validation = validateImageFile(file);
   if (!validation.isValid) {
+    console.error('❌ [uploadImageToTwitter] File validation failed:', validation.error);
     return {
       success: false,
       error: validation.error
     };
   }
 
+  console.log('✅ [uploadImageToTwitter] File validation passed');
   onProgress?.(10);
 
   // Step 1: Initialize
+  console.log('📡 [uploadImageToTwitter] Step 1: Initializing upload...');
   const initResult = await initMediaUpload(file, cookies);
+  console.log('📡 [uploadImageToTwitter] Step 1 result:', initResult);
+  
   if (!initResult.success || !initResult.mediaId) {
     return {
       success: false,
@@ -353,9 +356,12 @@ export async function uploadImageToTwitter(
   onProgress?.(30);
 
   // Step 2: Append data
+  console.log('📡 [uploadImageToTwitter] Step 2: Uploading file data...');
   const appendResult = await appendMediaData(file, initResult.mediaId, cookies, (progress) => {
     onProgress?.(30 + (progress * 0.5)); // 30-80%
   });
+  console.log('📡 [uploadImageToTwitter] Step 2 result:', appendResult);
+  
   if (!appendResult.success) {
     return {
       success: false,
@@ -366,7 +372,10 @@ export async function uploadImageToTwitter(
   onProgress?.(80);
 
   // Step 3: Finalize
+  console.log('📡 [uploadImageToTwitter] Step 3: Finalizing upload...');
   const finalizeResult = await finalizeMediaUpload(initResult.mediaId, cookies);
+  console.log('📡 [uploadImageToTwitter] Step 3 result:', finalizeResult);
+  
   if (!finalizeResult.success) {
     return {
       success: false,
@@ -375,6 +384,7 @@ export async function uploadImageToTwitter(
   }
 
   onProgress?.(100);
+  console.log('🎉 [uploadImageToTwitter] Upload completed successfully! Media ID:', initResult.mediaId);
 
   return {
     success: true,

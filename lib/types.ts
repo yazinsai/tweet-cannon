@@ -18,7 +18,7 @@ export interface Tweet {
 export interface MediaAttachment {
   id: string;
   mediaId?: string; // Twitter media ID after upload
-  file: File;
+  file?: File; // Optional since it's removed during storage
   preview: string; // Data URL for preview
   uploadStatus: 'pending' | 'uploading' | 'uploaded' | 'failed';
   uploadProgress?: number;

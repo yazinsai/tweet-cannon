@@ -167,12 +167,19 @@ export function addTweet(data: CreateTweetData, enableThreading: boolean = true)
     throw new Error(ERROR_MESSAGES.QUEUE_FULL);
   }
 
+  // Process media to remove File objects before storing
+  const processedMedia = data.media?.map(media => ({
+    ...media,
+    file: undefined // Remove File object to avoid serialization issues
+  }));
+
   const tweet: Tweet = {
     id: crypto.randomUUID(),
     content: data.content.trim(),
     status: 'queued',
     createdAt: new Date(),
     scheduledFor: data.scheduledFor,
+    media: processedMedia,
   };
 
   tweets.push(tweet);

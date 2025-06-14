@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { UserSession } from '@/lib/types';
 import { getUserSession, saveUserSession, clearUserSession } from '@/lib/storage';
 
@@ -17,7 +17,7 @@ export function useAuth(): UseAuthReturn {
   const [session, setSession] = useState<UserSession | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const checkSession = async () => {
+  const checkSession = useCallback(async () => {
     try {
       setIsLoading(true);
       const currentSession = await getUserSession();
@@ -28,18 +28,18 @@ export function useAuth(): UseAuthReturn {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
-  const logout = async () => {
+  const logout = useCallback(async () => {
     try {
       await clearUserSession();
       setSession(null);
     } catch (error) {
       console.error('Failed to logout:', error);
     }
-  };
+  }, []);
 
-  const updateSession = async (newSession: UserSession) => {
+  const updateSession = useCallback(async (newSession: UserSession) => {
     try {
       await saveUserSession(newSession);
       setSession(newSession);
@@ -47,7 +47,7 @@ export function useAuth(): UseAuthReturn {
       console.error('Failed to update session:', error);
       throw error;
     }
-  };
+  }, []);
 
   useEffect(() => {
     // Initial session check - don't depend on checkSession to avoid circular updates

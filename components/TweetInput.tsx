@@ -100,9 +100,61 @@ const TweetInput: React.FC<TweetInputProps> = ({ onTweetAdded, className, enable
         return;
       }
 
+      // Upload media immediately when adding to queue
+      let processedMedia: MediaAttachment[] | undefined = undefined;
+      
+      if (images.length > 0) {
+        console.log('🖼️ [TweetInput] Uploading media before adding to queue:', images.length, 'files');
+        processedMedia = [];
+        
+        // Get session for media upload
+        const { getUserSession } = await import('@/lib/storage');
+        const session = await getUserSession();
+        
+        if (!session || !session.isValid || !session.cookies) {
+          throw new Error('No authentication cookies found. Please set up authentication first.');
+        }
+        
+        for (const media of images) {
+          if (media.file) {
+            console.log(`⬆️ [TweetInput] Uploading: ${media.file.name}`);
+            
+            const formData = new FormData();
+            formData.append('file', media.file);
+            formData.append('cookies', session.cookies);
+
+            const uploadResponse = await fetch('/api/upload-media', {
+              method: 'POST',
+              body: formData,
+            });
+
+            if (!uploadResponse.ok) {
+              const uploadError = await uploadResponse.json();
+              throw new Error(`Media upload failed: ${uploadError.error}`);
+            }
+
+            const uploadData = await uploadResponse.json();
+            if (!uploadData.mediaId) {
+              throw new Error('No media ID returned from upload');
+            }
+
+            // Create a media attachment without the File object for storage
+            processedMedia.push({
+              id: media.id,
+              mediaId: uploadData.mediaId,
+              file: media.file, // Keep for now but won't be serialized
+              preview: media.preview,
+              uploadStatus: 'uploaded' as const
+            });
+            
+            console.log(`✅ [TweetInput] Media uploaded: ${uploadData.mediaId}`);
+          }
+        }
+      }
+
       const tweetData: CreateTweetData = {
         content: content.trim(),
-        media: images.length > 0 ? images : undefined,
+        media: processedMedia,
       };
 
       const newTweet = addTweet(tweetData, enableThreading);
